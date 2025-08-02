@@ -175,7 +175,7 @@ export default function Home() {
             </h2>
 
             <p className="text-sm text-gray-300 mb-8 max-w-sm mx-auto">
-              We're almost ready. Get notified when Aurema goes live.
+              We&apos;re almost ready. Get notified when Aurema goes live.
             </p>
 
             <form onSubmit={handleSubmit} className="max-w-sm mx-auto">
