@@ -1,0 +1,105 @@
+@import "tailwindcss";
+
+:root {
+  --background: #232529;
+  --foreground: #f0f0f0;
+  --card-bg: rgba(30, 32, 36, 0.7);
+  --card-border: rgba(255, 255, 255, 0.08);
+  --input-bg: rgba(0, 0, 0, 0.25);
+  --input-border: rgba(255, 255, 255, 0.15);
+  --accent-blue: #a3b8ff;
+}
+
+@theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: "Inter", sans-serif;
+  --font-serif: "Playfair Display", serif;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  overflow-x: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.background-pattern {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  background-color: #1a1c20;
+  background-image:
+    radial-gradient(circle at 100% 50%, transparent 110px, rgba(255, 255, 255, 0.04) 110px, rgba(255, 255, 255, 0.04) 111px, transparent 111px),
+    radial-gradient(circle at 0% 50%, transparent 110px, rgba(255, 255, 255, 0.04) 110px, rgba(255, 255, 255, 0.04) 111px, transparent 111px);
+  background-size: 194px 97px;
+}
+
+.glass-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 24px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  position: relative;
+}
+
+.glass-input {
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: 12px;
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  transition: all 0.2s ease-in-out;
+}
+
+.glass-input:focus {
+  outline: none;
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+.glass-input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.primary-button {
+  background: #f0f0f0;
+  color: #1a1a1a;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.primary-button:hover {
+  background: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.primary-button:active {
+  transform: translateY(0);
+}
+
+.primary-button:disabled {
+  background: #cccccc;
+  cursor: not-allowed;
+}
