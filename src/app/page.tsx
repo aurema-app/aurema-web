@@ -61,7 +61,7 @@ export default function Home() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [error, setError] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) {
       setError("Please enter your name.");
@@ -76,15 +76,38 @@ export default function Home() {
       setError("Please enter a valid email address.");
       return;
     }
+    
     setError("");
     setIsSubmitted(true);
-    console.log("Form submitted:", { name, email });
-    // Reset form after a delay
-    setTimeout(() => {
-      setName("");
-      setEmail("");
+
+    try {
+      const response = await fetch('/api/subscribe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name: name.trim(), email }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        console.log('Successfully subscribed:', data);
+        // Keep the success state for 4 seconds
+        setTimeout(() => {
+          setName("");
+          setEmail("");
+          setIsSubmitted(false);
+        }, 4000);
+      } else {
+        setError(data.error || 'Something went wrong. Please try again.');
+        setIsSubmitted(false);
+      }
+    } catch (error) {
+      console.error('Subscription error:', error);
+      setError('Network error. Please check your connection and try again.');
       setIsSubmitted(false);
-    }, 4000);
+    }
   };
 
   return (
