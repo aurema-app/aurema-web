@@ -2,30 +2,16 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 
 const AuremaIcon = () => (
-  <svg
-    width="32"
-    height="32"
-    viewBox="0 0 32 32"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className="text-gray-300"
-  >
-    <circle cx="16" cy="16" r="14" stroke="currentColor" strokeWidth="1" />
-    <g transform="translate(16, 16)">
-      {[0, 60, 120, 180, 240, 300].map((angle) => (
-        <g key={angle} transform={`rotate(${angle})`}>
-          <path
-            d="M0 -11 C 6 -6, 6 6, 0 11"
-            stroke="currentColor"
-            strokeWidth="1"
-            fill="none"
-          />
-        </g>
-      ))}
-    </g>
-  </svg>
+  <Image
+    src="/logo.png"
+    alt="Aurema Logo"
+    width={48}
+    height={48}
+    className="object-contain"
+  />
 );
 
 const MailIcon = () => (
@@ -55,65 +41,32 @@ const MailIcon = () => (
 );
 
 const Landscape = () => (
-  <div className="absolute bottom-0 left-0 right-0 h-1/2 overflow-hidden pointer-events-none">
-    <svg
-      className="absolute bottom-0 w-full h-auto"
-      viewBox="0 0 800 200"
-      preserveAspectRatio="xMidYMax meet"
-    >
-      <defs>
-        <filter id="soft-blur" x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur in="SourceGraphic" stdDeviation="2" />
-        </filter>
-        <linearGradient id="sky-gradient" x1="0.5" y1="0" x2="0.5" y2="1">
-          <stop offset="0%" stopColor="#222428" stopOpacity="0" />
-          <stop offset="100%" stopColor="#222428" stopOpacity="1" />
-        </linearGradient>
-      </defs>
-
-      <rect x="0" y="0" width="800" height="200" fill="url(#sky-gradient)" />
-
-      <g filter="url(#soft-blur)" opacity="0.7">
-        <path
-          d="M-50,150 Q150,120 400,145 T850,155 L850,200 L-50,200 Z"
-          fill="#1e2024"
-        />
-        <path
-          d="M-50,160 Q200,140 400,155 T850,145 L850,200 L-50,200 Z"
-          fill="#1a1c20"
-        />
-      </g>
-
-      <g transform="translate(250 145)" opacity="0.7" filter="url(#soft-blur)">
-        <path d="M0,0 l-5,-20 a25,25 0 1,1 10,0 Z" fill="#111" />
-        <path
-          d="M-20,-10 a40,25 0 0,1 40,0"
-          fill="#111"
-          stroke="#111"
-          stroke-width="4"
-        />
-      </g>
-
-      <g transform="translate(550 155)" opacity="0.7" filter="url(#soft-blur)">
-        <path d="M0,0 l-4,-18 a20,20 0 1,1 8,0 Z" fill="#111" />
-        <path
-          d="M-15,-8 a30,20 0 0,1 30,0"
-          fill="#111"
-          stroke="#111"
-          stroke-width="3"
-        />
-      </g>
-    </svg>
+  <div className="absolute bottom-0 left-0 right-0 h-48 overflow-hidden pointer-events-none">
+    <Image
+      src="/trees.png"
+      alt="Trees landscape"
+      fill
+      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+      quality={90}
+      priority={false}
+      className="object-cover object-bottom"
+    />
+    <div className="absolute inset-0 bg-gradient-to-t from-transparent via-transparent to-[#212529]" />
   </div>
 );
 
 export default function Home() {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [error, setError] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!name.trim()) {
+      setError("Please enter your name.");
+      return;
+    }
     if (!email) {
       setError("Please enter a valid email address.");
       return;
@@ -125,9 +78,10 @@ export default function Home() {
     }
     setError("");
     setIsSubmitted(true);
-    console.log("Email submitted:", email);
+    console.log("Form submitted:", { name, email });
     // Reset form after a delay
     setTimeout(() => {
+      setName("");
       setEmail("");
       setIsSubmitted(false);
     }, 4000);
@@ -139,58 +93,73 @@ export default function Home() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
-        className="glass-card w-full max-w-xl shadow-2xl"
+        className="glass-card w-full max-w-2xl shadow-2xl"
       >
-        <div className="p-10 relative">
-          <header className="flex justify-between items-center mb-12">
+        <div className="p-8 pb-0 relative min-h-[500px] flex flex-col">
+          <header className="flex justify-between items-center mb-8">
             <AuremaIcon />
             <nav className="flex gap-6">
               <a
                 href="#"
-                className="text-xs text-gray-400 hover:text-white transition-colors"
+                className="text-xs text-gray-400 hover:text-white transition-colors font-sans"
               >
                 Privacy Policy
               </a>
               <a
                 href="#"
-                className="text-xs text-gray-400 hover:text-white transition-colors"
+                className="text-xs text-gray-400 hover:text-white transition-colors font-sans"
               >
                 Terms of Service
               </a>
             </nav>
           </header>
 
-          <div className="text-center">
-            <h1 className="font-serif text-4xl md:text-5xl text-gray-100 mb-2">
-              Where thoughts meet{" "}
+          <div className="text-center flex-1 flex flex-col justify-center pb-40">
+            <h1 className="font-serif text-gray-100 mb-2" style={{ fontSize: "40px" }}>
+              Where{" "}
               <span
                 className="font-bold"
-                style={{ color: "var(--accent-blue)" }}
+                style={{ color: "#F5E0F8" }}
+              >
+                thoughts
+              </span>{" "}
+              meet{" "}
+              <span
+                className="font-bold"
+                style={{ color: "#BACFFF" }}
               >
                 clarity.
               </span>
             </h1>
             <h2 className="font-serif text-3xl md:text-4xl text-gray-200 mb-8">
-              Aurema.
+              Meet Aurema.
             </h2>
 
-            <p className="text-sm text-gray-300 mb-8 max-w-sm mx-auto">
+            <p className="text-sm mb-8 mx-auto" style={{ color: "#6C757D" }}>
               We&apos;re almost ready. Get notified when Aurema goes live.
             </p>
 
-            <form onSubmit={handleSubmit} className="max-w-sm mx-auto">
+            <form onSubmit={handleSubmit} className="w-11/12 mx-auto">
               <div className="flex flex-col gap-4">
+                <input
+                  type="text"
+                  placeholder="Enter your name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="glass-input w-full px-5 py-3 text-sm text-left"
+                  disabled={isSubmitted}
+                />
                 <input
                   type="email"
                   placeholder="Enter your email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="glass-input w-full px-5 py-3 text-sm text-center"
+                  className="glass-input w-full px-5 py-3 text-sm text-left"
                   disabled={isSubmitted}
                 />
                 <motion.button
                   type="submit"
-                  className="primary-button w-full py-3 text-sm"
+                  className="primary-button w-full py-3 text-sm mb-8"
                   disabled={isSubmitted}
                 >
                   <AnimatePresence mode="wait">
