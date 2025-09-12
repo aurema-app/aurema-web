@@ -54,30 +54,38 @@ export async function POST(request: NextRequest) {
       { status: 200 }
     );
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Brevo API Error:', error);
-    console.error('Error response:', error.response?.data);
-    console.error('Error status:', error.response?.status);
+    
+    // Type guard for axios error
+    const isAxiosError = (err: unknown): err is { response?: { status?: number; data?: { message?: string; code?: string } } } => {
+      return typeof err === 'object' && err !== null && 'response' in err;
+    };
 
-    // Handle duplicate email (contact already exists)
-    if (error.response?.status === 400 && 
-        (error.response?.data?.message?.includes('Contact already exist') || 
-         error.response?.data?.code === 'duplicate_parameter')) {
-      return NextResponse.json(
-        { 
-          message: 'You are already on our waiting list!',
-          success: true 
-        },
-        { status: 200 }
-      );
-    }
+    if (isAxiosError(error)) {
+      console.error('Error response:', error.response?.data);
+      console.error('Error status:', error.response?.status);
 
-    // Handle other API errors
-    if (error.response?.status) {
-      return NextResponse.json(
-        { error: `API Error: ${error.response?.data?.message || 'Failed to subscribe. Please try again later.'}` },
-        { status: 500 }
-      );
+      // Handle duplicate email (contact already exists)
+      if (error.response?.status === 400 && 
+          (error.response?.data?.message?.includes('Contact already exist') || 
+           error.response?.data?.code === 'duplicate_parameter')) {
+        return NextResponse.json(
+          { 
+            message: 'You are already on our waiting list!',
+            success: true 
+          },
+          { status: 200 }
+        );
+      }
+
+      // Handle other API errors
+      if (error.response?.status) {
+        return NextResponse.json(
+          { error: `API Error: ${error.response?.data?.message || 'Failed to subscribe. Please try again later.'}` },
+          { status: 500 }
+        );
+      }
     }
 
     // Handle unexpected errors
@@ -89,7 +97,7 @@ export async function POST(request: NextRequest) {
 }
 
 // Handle preflight requests for CORS
-export async function OPTIONS(request: NextRequest) {
+export async function OPTIONS() {
   return new NextResponse(null, {
     status: 200,
     headers: {
