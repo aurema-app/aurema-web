@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
     if (!process.env.BREVO_API_KEY) {
       console.error('BREVO_API_KEY is not set');
       return NextResponse.json(
-        { error: 'Server configuration error' },
+        { error: 'Server configuration error. Please contact support.' },
         { status: 500 }
       );
     }

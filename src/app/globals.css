@@ -1,4 +1,6 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
   --background: #212529;
@@ -8,13 +10,6 @@
   --input-bg: rgba(0, 0, 0, 0.25);
   --input-border: rgba(255, 255, 255, 0.15);
   --accent-blue: #a3b8ff;
-}
-
-@theme {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-quicksand), sans-serif;
-  --font-serif: var(--font-cormorant-garamond), serif;
 }
 
 html, body {
