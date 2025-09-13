@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
+import Link from "next/link";
 
 const AuremaIcon = () => (
   <Image
@@ -122,18 +123,18 @@ export default function Home() {
           <header className="flex justify-between items-center mb-8">
             <AuremaIcon />
             <nav className="flex gap-6">
-              <a
-                href="#"
+              <Link
+                href="/privacy"
                 className="text-xs text-gray-400 hover:text-white transition-colors font-sans"
               >
                 Privacy Policy
-              </a>
-              <a
-                href="#"
+              </Link>
+              <Link
+                href="/terms"
                 className="text-xs text-gray-400 hover:text-white transition-colors font-sans"
               >
                 Terms of Service
-              </a>
+              </Link>
             </nav>
           </header>
 
