@@ -61,7 +61,7 @@ export default function TermsOfService() {
             <div className="space-y-8 text-gray-300" style={{ fontFamily: "var(--font-quicksand)", fontSize: "16px", lineHeight: "1.6" }}>
               <section>
                 <p>
-                  Welcome to Aurema. These Terms of Service ("Terms") govern your use of our AI-powered therapy and guided meditation platform. By using our services, you agree to these Terms.
+                  Welcome to Aurema. These Terms of Service (&ldquo;Terms&rdquo;) govern your use of our AI-powered therapy and guided meditation platform. By using our services, you agree to these Terms.
                 </p>
               </section>
 
@@ -71,7 +71,7 @@ export default function TermsOfService() {
                   Aurema provides AI-powered mental health support, guided meditations, and wellness tools. Our services are designed to complement, not replace, professional medical treatment.
                 </p>
                 <p className="mt-4">
-                  <strong>Important:</strong> Our AI therapist is not a replacement for licensed mental health professionals. If you're experiencing a mental health crisis, please contact emergency services or a crisis hotline immediately.
+                  <strong>Important:</strong> Our AI therapist is not a replacement for licensed mental health professionals. If you&rsquo;re experiencing a mental health crisis, please contact emergency services or a crisis hotline immediately.
                 </p>
               </section>
 
@@ -123,7 +123,7 @@ export default function TermsOfService() {
                   <li>Subscription fees are billed in advance on a recurring basis</li>
                   <li>You can cancel your subscription at any time through your account settings</li>
                   <li>Refunds are provided according to our refund policy</li>
-                  <li>We may change subscription prices with 30 days' notice</li>
+                  <li>We may change subscription prices with 30 days&rsquo; notice</li>
                 </ul>
               </section>
 

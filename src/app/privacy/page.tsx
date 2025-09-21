@@ -71,7 +71,7 @@ export default function PrivacyPolicy() {
 
               <section>
                 <p>
-                  At Aurema, our company values include putting members first. We are committed to protecting and respecting your privacy in connection with your use of our mental health and meditation services via our websites, including the Aurema mobile app ("Apps"), or other delivery methods (websites, Apps, and other delivery methods are collectively referred to as our "Products"). Aurema may deliver coaching services (as therapy), and other mental wellness collectively referred to as our ("Services") using the Products or via other delivery methods, as applicable.
+                  At Aurema, our company values include putting members first. We are committed to protecting and respecting your privacy in connection with your use of our mental health and meditation services via our websites, including the Aurema mobile app (&ldquo;Apps&rdquo;), or other delivery methods (websites, Apps, and other delivery methods are collectively referred to as our &ldquo;Products&rdquo;). Aurema may deliver coaching services (as therapy), and other mental wellness collectively referred to as our (&ldquo;Services&rdquo;) using the Products or via other delivery methods, as applicable.
                 </p>
               </section>
 
@@ -125,7 +125,7 @@ export default function PrivacyPolicy() {
                 <h2 className="text-gray-100 mt-12 mb-6" style={{ fontFamily: "var(--font-cormorant-garamond)", fontWeight: "bold", fontSize: "36px", lineHeight: "1.2" }}>Information Sharing</h2>
                 <p>We may share your information in limited circumstances:</p>
                 <ul className="list-disc pl-6 space-y-2 mt-4">
-                  <li><strong>Emergency Situations:</strong> If we believe there's imminent risk of harm to yourself or others</li>
+                  <li><strong>Emergency Situations:</strong> If we believe there&rsquo;s imminent risk of harm to yourself or others</li>
                   <li><strong>Legal Requirements:</strong> When required by law, court order, or regulatory authorities</li>
                   <li><strong>Service Providers:</strong> With trusted partners who help us deliver our services (under strict confidentiality agreements)</li>
                   <li><strong>Aggregated Data:</strong> Anonymized, non-identifiable data for research and service improvement</li>
