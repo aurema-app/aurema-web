@@ -122,46 +122,41 @@ export default function Home() {
         <div className="p-8 pb-0 relative min-h-[500px] flex flex-col">
           <header className="flex justify-between items-center mb-8">
             <AuremaIcon />
-            <nav className="flex gap-6">
+            <nav className="flex gap-3 sm:gap-6">
               <Link
                 href="/privacy"
-                className="text-xs text-gray-400 hover:text-white transition-colors font-sans"
+                className="hover:text-white transition-colors whitespace-nowrap"
+                style={{ fontFamily: "var(--font-quicksand)", fontWeight: "700", fontSize: "16px", color: "#6C757D" }}
               >
-                Privacy Policy
+                Privacy
               </Link>
               <Link
                 href="/terms"
-                className="text-xs text-gray-400 hover:text-white transition-colors font-sans"
+                className="hover:text-white transition-colors whitespace-nowrap"
+                style={{ fontFamily: "var(--font-quicksand)", fontWeight: "700", fontSize: "16px", color: "#6C757D" }}
               >
-                Terms of Service
+                Terms
               </Link>
             </nav>
           </header>
 
           <div className="text-center flex-1 flex flex-col justify-center pb-40">
-            <h1 className="font-serif text-gray-100 mb-2" style={{ fontSize: "40px" }}>
-              Where{" "}
-              <span
-                className="font-bold"
-                style={{ color: "#F5E0F8" }}
-              >
-                thoughts
-              </span>{" "}
-              meet{" "}
-              <span
-                className="font-bold"
-                style={{ color: "#BACFFF" }}
-              >
-                clarity.
-              </span>
-            </h1>
-            <h2 className="font-serif text-3xl md:text-4xl text-gray-200 mb-8">
+            <h1 className="text-gray-100 mb-8" style={{ fontFamily: "var(--font-cormorant-garamond)", fontWeight: "bold", fontSize: "40px", lineHeight: "1.2" }}>
+              Where <span style={{ color: "#F5E0F8" }}>thoughts</span> become <span style={{ color: "#BACFFF" }}>clarity</span>.<br />
               Meet Aurema.
-            </h2>
+            </h1>
 
-            <p className="text-sm mb-8 mx-auto" style={{ color: "#6C757D" }}>
-              We&apos;re almost ready. Get notified when Aurema goes live.
-            </p>
+            <div className="mb-10 mx-auto max-w-xl space-y-4">
+              <p style={{ fontFamily: "var(--font-quicksand)", fontWeight: "600", fontSize: "16px", color: "#ADB5BD", lineHeight: "1.6" }}>
+                Aurema helps you turn overthinking into clarity through mindful conversations, rituals, and guided inner work. 
+              </p>
+            </div>
+
+            <div className="mb-4">
+              <p className="uppercase tracking-widest" style={{ fontFamily: "var(--font-quicksand)", fontWeight: "700", fontSize: "14px", color: "#6C757D" }}>
+                Be the first to unlock Aurema
+              </p>
+            </div>
 
             <form onSubmit={handleSubmit} className="w-11/12 mx-auto">
               <div className="flex flex-col gap-4">
@@ -170,7 +165,8 @@ export default function Home() {
                   placeholder="Enter your name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="glass-input w-full px-5 py-3 text-sm text-left"
+                  className="glass-input w-full px-5 py-3 text-left"
+                  style={{ fontFamily: "var(--font-quicksand)", fontWeight: "600", fontSize: "16px" }}
                   disabled={isSubmitted}
                 />
                 <input
@@ -178,12 +174,14 @@ export default function Home() {
                   placeholder="Enter your email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="glass-input w-full px-5 py-3 text-sm text-left"
+                  className="glass-input w-full px-5 py-3 text-left"
+                  style={{ fontFamily: "var(--font-quicksand)", fontWeight: "600", fontSize: "16px" }}
                   disabled={isSubmitted}
                 />
                 <motion.button
                   type="submit"
-                  className="primary-button w-full py-3 text-sm mb-8"
+                  className="primary-button w-full py-3 mb-8"
+                  style={{ fontFamily: "var(--font-quicksand)", fontWeight: "700", fontSize: "16px" }}
                   disabled={isSubmitted}
                 >
                   <AnimatePresence mode="wait">
@@ -206,7 +204,7 @@ export default function Home() {
                         transition={{ duration: 0.3 }}
                         className="flex items-center justify-center"
                       >
-                        Join Waiting List <MailIcon />
+                        Join Waitlist <MailIcon />
                       </motion.span>
                     )}
                   </AnimatePresence>
@@ -218,7 +216,8 @@ export default function Home() {
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: "auto" }}
                     exit={{ opacity: 0, height: 0 }}
-                    className="text-xs text-red-400 mt-2"
+                    className="text-red-400 mt-2"
+                    style={{ fontFamily: "var(--font-quicksand)", fontWeight: "600", fontSize: "16px" }}
                   >
                     {error}
                   </motion.p>

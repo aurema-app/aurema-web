@@ -1,11 +1,8 @@
 @import "tailwindcss";
 
-@theme {
+:root {
   --font-sans: var(--font-quicksand), system-ui, sans-serif;
   --font-serif: var(--font-cormorant-garamond), Georgia, serif;
-}
-
-:root {
   --background: #212529;
   --foreground: #f0f0f0;
   --card-bg: #212529;
