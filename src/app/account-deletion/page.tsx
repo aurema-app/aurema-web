@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Account Deletion | Aurema",
@@ -20,12 +21,12 @@ export default function AccountDeletionPage() {
               height={48}
               className="object-contain"
             />
-            <a
+            <Link
               href="/"
               className="text-xs text-gray-400 hover:text-white transition-colors font-sans"
             >
               Back to Home
-            </a>
+            </Link>
           </header>
 
           <section className="flex-1 flex flex-col justify-center">
@@ -47,7 +48,7 @@ export default function AccountDeletionPage() {
             <div className="space-y-4 text-sm text-gray-300">
               <p>
                 Please include the email used for your account and, if possible,
-                the subject line "Account Deletion Request".
+                the subject line &quot;Account Deletion Request&quot;.
               </p>
               <p>
                 We will review your request and process deletion as soon as
