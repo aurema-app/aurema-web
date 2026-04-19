@@ -2,7 +2,11 @@
 
 import { Box, Button, Heading, Text } from "@chakra-ui/react";
 
+import { useFunnelNavigation } from "@/funnel/flow/useFunnelNavigation";
+
 export function IntroStep() {
+  const { goNext } = useFunnelNavigation();
+
   return (
     <Box
       minH="100vh"
@@ -44,6 +48,7 @@ export function IntroStep() {
           w="full"
           borderRadius="xl"
           _hover={{ opacity: 0.9 }}
+          onClick={goNext}
         >
           Get started
         </Button>

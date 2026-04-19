@@ -4,13 +4,13 @@ Single source of truth for where we are. Agents: update this at the end of every
 
 ## Current phase
 
-**Phase 1 — Funnel shell — COMPLETE (2026-04-19)**
+**Phase 2 — Step engine + primitives — COMPLETE (2026-04-19)**
 
 ## Phase checklist
 
 - [x] **Phase 0** — Agent scaffolding (rules + skills + docs)
 - [x] **Phase 1** — Funnel shell (Chakra, route group, placeholder step)
-- [ ] **Phase 2** — Step engine + primitives
+- [x] **Phase 2** — Step engine + primitives
 - [ ] **Phase 3** — Generate + plan preview
 - [ ] **Phase 4** — Account capture (Brevo + Firebase Auth)
 - [ ] **Phase 5** — RevenueCat Web Billing config
@@ -40,19 +40,19 @@ Single source of truth for where we are. Agents: update this at the end of every
 - Chakra v3 uses `createSystem(defaultConfig, defineConfig({...}))` + `<ChakraProvider value={system}>` — completely different API from v2's `extendTheme` + `<ChakraProvider theme={...}>`. Do not copy web-funnel reference verbatim.
 - `next-themes` installed alongside Chakra v3 for future dark mode support if needed; not wired in yet.
 - Lockfile warning (`Found multiple lockfiles`) is benign — caused by a parent-directory `package-lock.json` unrelated to this repo.
+- **Phase 2 (2026-04-19)**: `flow.ts` does NOT store component refs to avoid a circular-import cycle (`flow → steps → useFunnelNavigation → flow`). The component map lives in `[stepId]/page.tsx` instead. This is a clean and intentional deviation from the plan's type signature.
+- `ANSWERS_STORAGE_KEY = 'aurema.funnel.answers.v1'` exported from `types.ts` and used by both `FunnelContext.tsx` and any future migration code.
+- Analytics stub is a `console.debug` in dev only; Phase 8 swaps in the real Amplitude call.
+- 5 steps shipped: `intro`, `goal`, `age`, `current-state`, `frequency`.
 
 ## Next session — suggested start
 
-Phase 2: step engine + primitives.
+Phase 3: generating screen + plan preview.
 
-1. Create `src/funnel/state/FunnelContext.tsx` with `answers: FunnelAnswers`, `setAnswer`, localStorage hydration (key `aurema.funnel.answers.v1`).
-2. Create `src/funnel/state/types.ts` with the `FunnelAnswers` type.
-3. Define `src/funnel/flow/flow.ts` with at least the first 3–4 step definitions.
-4. Implement `src/funnel/flow/useFunnelNavigation.ts` with `goNext()` / `goPrev()`.
-5. Add `[stepId]/page.tsx` dynamic route that resolves a step from the flow.
-6. Build `OptionText` and `ContinueButton` primitives in `src/funnel/components/`.
-
-Consult `web-funnel/packages/ui/src/growth-plan/` per `.cursor/rules/references.mdc` for primitive patterns (translate Chakra v2 → v3).
+1. Add `{ id: 'generating' }` to `flow.ts` and create `src/funnel/steps/GeneratingStep.tsx` using `AutoLoadingBar` (build this primitive in `src/funnel/components/`).
+2. Create `src/funnel/steps/PlanPreviewStep.tsx` — static personalized summary reading from `useFunnelAnswers()`.
+3. Wire `FrequencyStep` terminal → `generating` by having `useFunnelNavigation`'s `goNext()` at end of flow push to `generating` (it currently no-ops at the last step).
+4. Consult `web-funnel/packages/ui/src/growth-plan/GenerateGrowthPlanPersonalize.tsx` per `.cursor/rules/references.mdc` for pattern, translate to Chakra v3.
 
 ## Prompt template for phases
 
