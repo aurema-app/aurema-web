@@ -1,0 +1,55 @@
+---
+description: Payments go through RevenueCat Web Billing only - never import the Stripe SDK directly
+alwaysApply: false
+---
+
+# Payments — RevenueCat Web Billing
+
+Payments are handled by **RevenueCat Web Billing** via `@revenuecat/purchases-js`. RevenueCat uses Stripe as the payment gateway internally, but our code **never imports the Stripe SDK directly**.
+
+## Golden rules
+
+1. **App User ID must equal the Firebase UID** on every platform (web, iOS, Android). This is the invariant that makes subscriptions cross-platform with zero migration code.
+2. **Never call Stripe APIs from our backend.** The existing RevenueCat webhook in `aurema-backend/src/controllers/webhookController.js` receives events for both mobile and web purchases and updates Firestore.
+3. Configure `Purchases` **once** at app start (in the funnel route group), never per-page.
+4. Don't store card data, PaymentIntent IDs, or Stripe customer IDs in our state. RevenueCat owns that.
+
+## Client setup
+
+- `src/funnel/services/revenueCatClient.ts` exports `configureRevenueCat(firebaseUid)` that calls `Purchases.configure(NEXT_PUBLIC_RC_WEB_PUBLIC_KEY, firebaseUid)` exactly once.
+- Call it from the funnel layout when a Firebase user is available. Before sign-in we do not render the paywall.
+
+## Paywall flow
+
+```ts
+const offerings = await purchases.getOfferings();
+const pkg = offerings.current?.monthly;
+const result = await purchases.purchase({
+  rcPackage: pkg,
+  htmlTarget: container,
+  customerEmail: answers.userEmail,
+  metadata: { source: "growth-plan", funnelVariant: variant },
+});
+```
+
+- `htmlTarget` is the DOM node where RC mounts its embedded Stripe-powered UI.
+- `customerEmail` skips RC's built-in email-collection step (we already have it).
+- `metadata` shows up in RevenueCat's customer view — useful for debugging.
+
+## Post-purchase
+
+- On `purchase()` resolving, navigate to `/growth-plan/activate`.
+- `/activate` polls `GET /user` (existing backend endpoint) until `subscriptionStatus === 'active'`, with a ~10s timeout.
+- On timeout, fall back to `purchases.getCustomerInfo()` — if the entitlement is active there, proceed; RevenueCat is authoritative.
+
+## Env vars
+
+- `NEXT_PUBLIC_RC_WEB_PUBLIC_KEY` — Web Billing public key, safe to ship to the client.
+
+No `STRIPE_*` env vars in this repo. Period.
+
+## Testing
+
+- Sandbox mode: toggle in the RevenueCat dashboard.
+- Stripe test cards work as usual inside the embedded checkout.
+- See `docs/funnel/03-payments.md` for the full test runbook.

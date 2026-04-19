@@ -1,0 +1,36 @@
+---
+description: Firebase Auth usage in the funnel - Google, Apple, email
+alwaysApply: false
+---
+
+# Auth — Firebase
+
+The funnel uses **Firebase Auth** on the client. Providers enabled: Google, Apple, email/password.
+
+## Setup
+
+- `src/funnel/services/firebaseClient.ts` initializes the Firebase app once using `NEXT_PUBLIC_FIREBASE_*` env vars.
+- Expose a `useFirebaseUser()` hook that returns `{ user, loading }`.
+- Do NOT initialize Firebase outside the funnel route group — marketing pages don't need it.
+
+## Sign-in flow
+
+- Early steps collect an email (Brevo lead capture). That email is **not** a Firebase account yet.
+- Before the paywall, the `SignInStep` asks the user to continue with Google, Apple, or email/password.
+- After successful sign-in, we store `firebaseUid` and `email` in funnel state and call `configureRevenueCat(firebaseUid)`.
+
+## Linking the early email
+
+- If the email used during lead capture matches the one from Google/Apple/email sign-in, the Firestore user doc will be keyed by Firebase UID anyway, so nothing special is needed.
+- If they differ, we prefer the Firebase-verified email on the user doc but keep the lead-capture email in Brevo. No merge logic in our code.
+
+## Apple Sign-In on web
+
+- Requires an Apple Services ID + return URL verification in Apple Developer. Tracked in `docs/funnel/05-auth.md`.
+- Do not stub it out in code — either it's configured and enabled in Firebase console, or the button isn't rendered.
+
+## Don'ts
+
+- Do not write passwords anywhere. Firebase handles them.
+- Do not issue our own JWTs. Backend uses `verifyIdToken` on the Firebase token.
+- Do not roll "sign in with magic link" without explicit ask.
