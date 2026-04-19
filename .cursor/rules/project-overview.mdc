@@ -17,7 +17,7 @@ The funnel drives new users through a short series of personalization steps and 
 - **Auth**: Firebase Auth (Google, Apple, email)
 - **Payments**: RevenueCat Web Billing via `@revenuecat/purchases-js` (Stripe under the hood)
 - **Analytics**: Amplitude (events + Amplitude Experiment for flags)
-- **Email capture**: Brevo (already in deps)
+- **Lead / email capture**: Firestore (`funnel_leads` collection in `aurema-backend`). No third-party ESP in MVP; export later if needed.
 - **Backend**: `aurema-backend` (Node/Express, Firebase Admin, existing RevenueCat webhook)
 
 ## Non-goals (do NOT add these without explicit ask)

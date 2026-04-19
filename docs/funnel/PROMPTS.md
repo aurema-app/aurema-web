@@ -86,48 +86,123 @@ Reference implementations (adapt — see .cursor/rules/references.mdc):
 
 ---
 
-## Phase 4 — Account capture (Brevo + Firebase Auth)
+## Phase 4 — Account capture (Firestore funnel_leads + Firebase Auth, email-link passwordless)
 
 ```
-Read docs/funnel/PROGRESS.md and docs/funnel/05-auth.md. Execute Phase 4.
+Read docs/funnel/PROGRESS.md, docs/funnel/05-auth.md, and
+.cursor/rules/auth.mdc. Execute Phase 4.
 
-Deliverables:
-- src/funnel/services/brevoClient.ts — server-side wrapper using the
-  existing @getbrevo/brevo dep (add env var BREVO_API_KEY to .env.example)
-- src/app/api/funnel/lead/route.ts — POST { email } -> Brevo contact
-- src/funnel/steps/EmailStep.tsx — collects email, posts to the route
-  handler, stores in funnel state as `userEmail`, advances
-- src/funnel/services/firebaseClient.ts — initializes the Firebase web SDK
-  using NEXT_PUBLIC_FIREBASE_* env vars (document in .env.example).
-  Uses the SAME Firebase project as aurema-app (mobile).
-- src/funnel/hooks/useFirebaseUser.ts
-- src/funnel/steps/SignInStep.tsx — three buttons (Google, Apple, email/password).
-  On success, stores `firebaseUid` + verified `email` in funnel state.
-- Register EmailStep and SignInStep in flow.ts with `when` predicates so
-  they skip if the user is already captured / signed in
+Auth model: Google, Apple, and email-link (passwordless). NO
+email/password. NO Admin-SDK createUser + custom-token shortcut (rejected
+for enumeration risk — see 05-auth.md).
+
+Lead capture goes into a new Firestore collection `funnel_leads` on
+aurema-backend. No third-party ESP.
+
+Backend deliverables (in /Users/senolfratila/work/aurema-backend):
+- New route POST /api/funnel/leads (public, lightly rate-limited) that
+  creates a doc in the Firestore `funnel_leads` collection with shape:
+    { email, source: 'growth-plan', capturedAt, funnelVariant?, userAgent? }
+  Upsert by email is fine; do NOT dedupe in a way that hides repeat
+  captures from different sessions / funnels.
+- Reuse existing express patterns (controllers/routes folders); no new deps
+- Unit test for the controller that asserts shape + timestamp
+
+Frontend deliverables (in aurema-web):
+
+1. src/funnel/services/leadsClient.ts — POST wrapper around the backend route.
+
+2. src/funnel/services/firebaseClient.ts — initializes the Firebase Web SDK
+   using NEXT_PUBLIC_FIREBASE_* env vars (document every var in .env.example).
+   Uses the SAME Firebase project as aurema-app (mobile).
+
+3. src/funnel/services/authActionCode.ts — exports the ActionCodeSettings
+   object used for sendSignInLinkToEmail. Default url:
+   'https://aurema-app.com/growth-plan/verify'. Include `linkDomain` only
+   if the user has decided on the Firebase-Hosting replacement for Dynamic
+   Links (see PROGRESS.md open question). If undecided, ship without
+   linkDomain — links will still work, they just land in the browser
+   rather than deep-linking into the mobile app.
+
+4. src/funnel/hooks/useFirebaseUser.ts — returns { user, loading }.
+
+5. src/funnel/steps/EmailStep.tsx — captures userEmail, calls leadsClient,
+   stores in FunnelAnswers, advances. On backend error, let the user
+   continue anyway (don't block the funnel on analytics).
+
+6. src/funnel/steps/SignInStep.tsx — three-option chooser with this
+   render order:
+   - "Continue with Google" (signInWithPopup(GoogleAuthProvider))
+   - "Continue with Apple" (signInWithPopup(OAuthProvider('apple.com'))),
+     ONLY rendered when NEXT_PUBLIC_APPLE_SIGNIN_ENABLED === 'true'
+   - "Continue with email" — prefills the email from FunnelAnswers,
+     calls sendSignInLinkToEmail(auth, email, actionCodeSettings) and
+     stores { email } in localStorage under 'aurema.pendingEmail'. After
+     sending, the step renders a "Check your email" view with the
+     destination email, a resend button (throttle 30s), and keeps
+     Google/Apple visible as fallbacks.
+   On any successful sign-in (Google / Apple / returning via verify route),
+   store firebaseUid + verified email in funnel state.
+
+7. src/app/(funnel)/growth-plan/verify/page.tsx — on mount:
+   - If isSignInWithEmailLink(auth, window.location.href) is false,
+     render an error state with a "start over" CTA.
+   - Read email from localStorage ('aurema.pendingEmail'); if missing,
+     prompt via a small Chakra form (different-device case).
+   - Call signInWithEmailLink(auth, email, window.location.href).
+   - Remove 'aurema.pendingEmail' from localStorage.
+   - Restore funnel state if hydration hasn't happened yet, then router.push
+     to '/growth-plan/paywall'.
+   - Surface errors clearly (expired link, wrong email).
+
+8. Register EmailStep and SignInStep in flow.ts between plan-preview and
+   paywall, with `when` predicates so already-captured / already-signed-in
+   users skip them.
+
+Env vars to document in .env.example:
+- NEXT_PUBLIC_FIREBASE_API_KEY
+- NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+- NEXT_PUBLIC_FIREBASE_PROJECT_ID
+- NEXT_PUBLIC_FIREBASE_APP_ID
+- NEXT_PUBLIC_APPLE_SIGNIN_ENABLED=false
 
 Constraints:
 - Follow .cursor/rules/auth.mdc exactly
-- Apple button only renders if NEXT_PUBLIC_APPLE_SIGNIN_ENABLED === 'true'
-  — do NOT enable it yet (requires Apple Services ID config, tracked in 05-auth.md)
-- Do not merge the lead-capture email with the Firebase email — keep both
-- Do not roll magic-link or phone auth
+- NO email/password anywhere. NO createUserWithEmailAndPassword.
+- NO Admin SDK createUser + custom token flows.
+- NO merging the lead-capture email with the Firebase email — keep both
+  (the funnel_leads row stays; user doc uses the Firebase-verified email).
+- NO @getbrevo/brevo imports in this phase. The dep stays in package.json
+  for the marketing subscribe route; funnel does not use it.
+- Apple button HIDDEN unless NEXT_PUBLIC_APPLE_SIGNIN_ENABLED === 'true'.
 
 Verify:
-- Submitting an email in dev creates a Brevo contact (or returns a clean
-  error if BREVO_API_KEY missing)
+- Submitting an email in dev creates a doc in Firestore `funnel_leads`.
+- If the backend route is down, EmailStep still lets the user proceed.
 - Google sign-in works against the dev Firebase project, populating
-  `firebaseUid` in funnel state
-- If the user reloads after sign-in, state is preserved
-- Reaching /growth-plan/sign-in while already signed in skips to the next step
+  firebaseUid in funnel state.
+- "Continue with email" sends a link from Firebase Auth (check inbox).
+  Clicking the link opens /growth-plan/verify which completes sign-in
+  and lands on /growth-plan/paywall.
+- Opening the email link in an incognito window (different-device case)
+  prompts for email and then completes sign-in correctly.
+- Reloading mid-funnel preserves state; reaching /growth-plan/sign-in
+  while already signed in skips to the next step.
 
-Run prettier. Update PROGRESS.md. Note any Apple Sign-In config work
-outstanding so Phase 9 QA catches it.
+Run prettier. Update PROGRESS.md. Note:
+- Whether the Dynamic-Links replacement was decided (linkDomain vs.
+  native Universal/App Links). If deferred, flag for Phase 9 QA.
+- Any Apple Sign-In config work outstanding.
 
 Reference implementations:
-- Firebase Auth docs (firebase.google.com) — this is the primary reference
-- web-funnel references are LIMITED here: workplace uses a different auth
-  stack. Only consult for EmailStep UX/copy:
+- Firebase Auth docs (firebase.google.com) — primary reference. Read:
+  - https://firebase.google.com/docs/auth/web/email-link-auth
+  - https://firebase.google.com/docs/auth/web/google-signin
+  - https://firebase.google.com/docs/auth/web/apple
+- aurema-backend/src/controllers/*.js — express controller pattern for
+  the leads endpoint
+- web-funnel references are LIMITED: workplace uses a different auth
+  stack. Only consult for EmailStep copy / layout inspiration:
   /Users/senolfratila/work/web-funnel/apps/deepstash/src/components/sign-up/SignUpStepContentBaseline.tsx
 ```
 
@@ -348,7 +423,9 @@ Deliverables:
 - docs/funnel/09-qa-checklist.md with a manual QA pass list covering:
     * Happy path: fresh browser → complete funnel → subscribe → activate
     * Resume path: reload mid-funnel, continue
-    * Sign-in paths: Google, email/password (Apple only if enabled)
+    * Sign-in paths: Google and email-link (Apple only if NEXT_PUBLIC_APPLE_SIGNIN_ENABLED is on).
+      For email-link, also test the different-device case: send from desktop,
+      open the link on mobile; the verify page should prompt for the email.
     * Paywall edge cases: declined card, 3DS card, abandon + return
     * Activate race: simulate slow webhook (manual pause in RC dashboard
       or disable briefly) and verify getCustomerInfo() fallback works

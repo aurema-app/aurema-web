@@ -17,7 +17,7 @@ src/funnel/
   flow/flow.ts       ordered list of steps + gating rules
   state/             FunnelContext + types for answers
   experiments/       Amplitude Experiment client + useVariant + flags
-  services/          revenueCatClient, firebaseClient, brevoClient, funnelApi
+  services/          revenueCatClient, firebaseClient, leadsClient, funnelApi
   analytics/track.ts typed Amplitude events
   theme/             Chakra theme tokens for the funnel
 ```

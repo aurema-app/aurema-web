@@ -15,4 +15,7 @@ export const flow: FunnelStep[] = [
   { id: "age" },
   { id: "current-state" },
   { id: "frequency" },
+  { id: "generating" },
+  { id: "plan-preview" },
+  { id: "paywall" },
 ];

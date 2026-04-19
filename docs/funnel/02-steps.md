@@ -13,10 +13,25 @@ This is the v1 flow. Steps are reordered or swapped via `src/funnel/flow/flow.ts
 | 5 | `frequency` | How often do you want to practice? | `frequency` |
 | 6 | `generating` | Animated "building your plan" screen | — |
 | 7 | `plan-preview` | Static personalized summary | — |
-| 8 | `email` | Lead capture (Brevo) | `userEmail` |
-| 9 | `sign-in` | Firebase auth (Google / Apple / email) | `firebaseUid` |
+| 8 | `email` | Lead capture (Firestore `funnel_leads`) | `userEmail` |
+| 9 | `sign-in` | Firebase auth (Google / Apple / email-link) | `firebaseUid` |
 | 10 | `paywall` | RevenueCat checkout | — |
 | 11 | `activate` | Success + deep link to app | — |
+
+### Side routes (not part of the linear flow)
+
+| Route | Purpose |
+|-------|---------|
+| `/growth-plan/verify` | Handles email-link sign-in completion. Runs `signInWithEmailLink`, sets `firebaseUid`, routes the user back into the funnel at the right point (usually paywall). |
+
+## Sign-in step paths
+
+The `sign-in` step is not a single question — it's a chooser with three paths. The UI renders three buttons (Google, Apple, email-link), plus a back link if the user wants to change their earlier email.
+
+- **Google** and **Apple**: popup/redirect OAuth. On success, advance immediately.
+- **Email-link**: the funnel calls `sendSignInLinkToEmail` with the email from step 8 (pre-filled, editable). The step then shows a "Check your email" screen with a "Resend link" affordance. When the user clicks the link in their inbox, they land on `/growth-plan/verify` which completes the sign-in and returns them to the funnel at the paywall.
+
+The Apple button is only rendered when `NEXT_PUBLIC_APPLE_SIGNIN_ENABLED === 'true'`.
 
 Keep steps short (< 10s to complete). Any step the user abandons costs us 100% of the remaining funnel.
 
@@ -31,7 +46,7 @@ Defined in `src/funnel/components/`. Reuse these before creating new ones.
 - `ProgressBar` — computed from current step index / total steps (excluding paywall + activate).
 - `AutoLoadingBar` — fills over N seconds, fires a callback when done.
 - `FunnelHeader` — logo + optional back button.
-- `GrowthPlanPolicy` — shared T&Cs / privacy link block used on paywall + email step.
+- `GrowthPlanPolicy` — shared T&Cs / privacy link block used on paywall + email / sign-in steps.
 
 ## Conventions
 

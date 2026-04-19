@@ -8,15 +8,20 @@ flowchart LR
   Funnel --> Steps[Step engine]
   Steps --> State[FunnelContext + localStorage]
   Steps --> Exp[useVariant - Amplitude Experiment]
-  Steps --> Lead[Email -> Brevo]
-  Steps --> Auth[Firebase Auth]
-  Auth -->|Firebase UID| Paywall[Paywall page]
+  Steps --> Lead[Email -> Firestore funnel_leads]
+  Steps --> Auth[SignInStep: Google / Apple / email-link]
+  Auth -->|"sendSignInLinkToEmail"| EmailInbox[User inbox]
+  EmailInbox -->|click link| Verify["/growth-plan/verify: signInWithEmailLink"]
+  Auth -->|"Google / Apple OAuth"| FBAuth[Firebase Auth]
+  Verify --> FBAuth
+  FBAuth -->|Firebase UID| Paywall[Paywall page]
   Paywall --> RCSdk[purchases-js purchase htmlTarget]
   RCSdk -->|embedded Stripe Elements| Stripe[Stripe]
   Stripe -->|charge succeeded| RC[RevenueCat]
   RC -->|webhook events| Backend[aurema-backend]
   Backend -->|update user doc| Firestore[(Firestore)]
-  Mobile[aurema-app mobile] -->|same App User ID = Firebase UID| RC
+  Mobile[aurema-app mobile] -->|email-link with same Firebase project| FBAuth
+  Mobile -->|same App User ID = Firebase UID| RC
   Funnel -->|track events| Amplitude[Amplitude]
 ```
 
@@ -33,6 +38,7 @@ aurema-web/
           [stepId]/page.tsx   Dynamic step renderer
           paywall/page.tsx    RC Web SDK checkout
           activate/page.tsx   Post-payment confirmation
+          verify/page.tsx     Email-link sign-in completion handler
       ...existing marketing routes untouched
     funnel/
       components/             StepShell, OptionText, OptionWithImage,
@@ -53,7 +59,7 @@ aurema-web/
       services/
         revenueCatClient.ts
         firebaseClient.ts
-        brevoClient.ts
+        leadsClient.ts
         funnelApi.ts
       analytics/
         track.ts              Typed Amplitude wrapper

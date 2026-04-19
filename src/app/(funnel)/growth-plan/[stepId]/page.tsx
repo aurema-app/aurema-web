@@ -10,6 +10,9 @@ import { GoalStep } from "@/funnel/steps/GoalStep";
 import { AgeStep } from "@/funnel/steps/AgeStep";
 import { CurrentStateStep } from "@/funnel/steps/CurrentStateStep";
 import { FrequencyStep } from "@/funnel/steps/FrequencyStep";
+import { GeneratingPlanStep } from "@/funnel/steps/GeneratingPlanStep";
+import { PlanPreviewStep } from "@/funnel/steps/PlanPreviewStep";
+import { PaywallStep } from "@/funnel/steps/PaywallStep";
 
 const STEP_COMPONENTS: Record<string, ComponentType> = {
   intro: IntroStep,
@@ -17,6 +20,9 @@ const STEP_COMPONENTS: Record<string, ComponentType> = {
   age: AgeStep,
   "current-state": CurrentStateStep,
   frequency: FrequencyStep,
+  generating: GeneratingPlanStep,
+  "plan-preview": PlanPreviewStep,
+  paywall: PaywallStep,
 };
 
 export default function StepPage() {
