@@ -4,7 +4,7 @@ Single source of truth for where we are. Agents: update this at the end of every
 
 ## Current phase
 
-**Phase 3 — Generate + plan preview — COMPLETE (2026-04-19)**
+**Phase 4 — Account capture — COMPLETE (2026-04-19)**
 
 ## Phase checklist
 
@@ -12,7 +12,7 @@ Single source of truth for where we are. Agents: update this at the end of every
 - [x] **Phase 1** — Funnel shell (Chakra, route group, placeholder step)
 - [x] **Phase 2** — Step engine + primitives
 - [x] **Phase 3** — Generate + plan preview
-- [ ] **Phase 4** — Account capture (Firestore `funnel_leads` + Firebase Auth)
+- [x] **Phase 4** — Account capture (Firestore `funnel_leads` + Firebase Auth)
 - [ ] **Phase 5** — RevenueCat Web Billing config
 - [ ] **Phase 6** — Paywall (purchases-js embedded)
 - [ ] **Phase 7** — Experiments (Amplitude Experiment, 1 reference)
@@ -25,8 +25,8 @@ Single source of truth for where we are. Agents: update this at the end of every
 |-------|----------|----------|------------|
 | 1 | Chakra v2 vs v3? | v3 (React 19 support) | 2026-04-19 |
 | 4 | Auth model for the funnel. | Google, Apple, **email-link (passwordless)**. No email/password. Admin-SDK + custom-token approach rejected for enumeration risk. | 2026-04-19 |
-| 4 | Email-link deep-linking replacement for Dynamic Links (sunset 25 Aug 2025)? | open — choose between Firebase Hosting `linkDomain` (e.g. `links.aurema-app.com`) vs. native iOS Universal Links + Android App Links on `aurema-app.com`. Decide during phase 4; the mobile-side work lives in `aurema-app`. | — |
-| 4 | Apple Sign-In on web enabled at launch? | open — gated by `NEXT_PUBLIC_APPLE_SIGNIN_ENABLED`; button hidden until Services ID + .p8 key are configured. | — |
+| 4 | Email-link deep-linking replacement for Dynamic Links (sunset 25 Aug 2025)? | **Deferred to Phase 9 QA.** Shipped without `linkDomain` — email links land in the browser at `/growth-plan/verify`. Mobile deep-linking requires choosing Firebase Hosting `linkDomain` vs. native Universal/App Links; mobile-side work lives in `aurema-app`. | — |
+| 4 | Apple Sign-In on web enabled at launch? | **Deferred.** Button hidden (`NEXT_PUBLIC_APPLE_SIGNIN_ENABLED=false`). Requires Apple Developer Services ID, domain + return URL, and .p8 key in Firebase Console → Auth → Apple. See `docs/funnel/05-auth.md`. | — |
 | 5 | Same entitlement ID as mobile? Verify with user. | open | — |
 | 6 | Fallback if RC embed styling is limiting? | `presentPaywall()` with themed RC-hosted paywall | 2026-04-19 |
 | 7 | Which first experiment to run? | open — candidate: intro hero | — |
@@ -47,10 +47,11 @@ Single source of truth for where we are. Agents: update this at the end of every
 - Analytics stub is a `console.debug` in dev only; Phase 8 swaps in the real Amplitude call.
 - 5 steps shipped: `intro`, `goal`, `age`, `current-state`, `frequency`.
 - **Phase 3 (2026-04-19)**: `AutoLoadingBar` primitive added to `src/funnel/components/`. `GeneratingPlanStep` auto-advances after ~4s with rotating reassurance copy. `PlanPreviewStep` derives a templated summary from all current answers (goal, frequency, currentState, ageRange). `PaywallStep` is a placeholder stub for Phase 6. Flow extended to 8 steps: `…frequency → generating → plan-preview → paywall`. CTA on plan-preview navigates to `/growth-plan/paywall`.
+- **Phase 4 (2026-04-19)**: Firebase Auth wired (Google, Apple-flagged, email-link passwordless). `aurema-backend` gains `POST /api/funnel/leads` (Firestore `funnel_leads` collection, auto-id, inline rate-limiter, no new deps). Frontend: `firebaseClient.ts`, `leadsClient.ts`, `authActionCode.ts` (no `linkDomain` — deferred), `useFirebaseUser.ts` hook, `EmailStep`, `SignInStep` (with 30s resend throttle + Google/Apple fallbacks in "Check your email" view), `/growth-plan/verify` page (same-device + different-device cases). Flow extended to 10 steps: `…plan-preview → email → sign-in → paywall` with `when` predicates skipping already-captured/signed-in users. `PlanPreviewStep` now uses `goNext()` so predicates route correctly. `NEXT_PUBLIC_APPLE_SIGNIN_ENABLED=false` gates Apple button. Backend controller unit test deferred — follow-up. CORS: production aurema-web host not yet in allow-list (flag for deploy).
 
 ## Next session — suggested start
 
-Phase 4: Account capture (Firestore `funnel_leads` + Firebase Auth — email-link passwordless).
+Phase 5: RevenueCat Web Billing config.
 
 Auth model locked in: **Google, Apple, email-link (passwordless)**. No email/password. See `docs/funnel/05-auth.md` for the full rationale.
 

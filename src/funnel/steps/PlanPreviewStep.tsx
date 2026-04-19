@@ -1,11 +1,11 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { Box, Text, VStack } from "@chakra-ui/react";
 
 import { StepShell } from "@/funnel/components/StepShell";
 import { ContinueButton } from "@/funnel/components/ContinueButton";
 import { useFunnelAnswers } from "@/funnel/state/useFunnelAnswers";
+import { useFunnelNavigation } from "@/funnel/flow/useFunnelNavigation";
 import type { FunnelAnswers } from "@/funnel/state/types";
 
 const GOAL_LABELS: Record<NonNullable<FunnelAnswers["goal"]>, string> = {
@@ -42,8 +42,8 @@ const AGE_CONTEXT: Record<NonNullable<FunnelAnswers["ageRange"]>, string> = {
 };
 
 export function PlanPreviewStep() {
-  const router = useRouter();
   const { answers } = useFunnelAnswers();
+  const { goNext } = useFunnelNavigation();
 
   const goalLabel = answers.goal ? GOAL_LABELS[answers.goal] : "your goals";
   const frequencyLabel = answers.frequency
@@ -59,11 +59,7 @@ export function PlanPreviewStep() {
   return (
     <StepShell
       title="Your plan is ready"
-      footer={
-        <ContinueButton onClick={() => router.push("/growth-plan/paywall")}>
-          See my plan
-        </ContinueButton>
-      }
+      footer={<ContinueButton onClick={goNext}>See my plan</ContinueButton>}
     >
       <VStack gap={4} align="stretch" pt={2}>
         <Box

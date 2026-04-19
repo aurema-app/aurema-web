@@ -12,6 +12,8 @@ import { CurrentStateStep } from "@/funnel/steps/CurrentStateStep";
 import { FrequencyStep } from "@/funnel/steps/FrequencyStep";
 import { GeneratingPlanStep } from "@/funnel/steps/GeneratingPlanStep";
 import { PlanPreviewStep } from "@/funnel/steps/PlanPreviewStep";
+import { EmailStep } from "@/funnel/steps/EmailStep";
+import { SignInStep } from "@/funnel/steps/SignInStep";
 import { PaywallStep } from "@/funnel/steps/PaywallStep";
 
 const STEP_COMPONENTS: Record<string, ComponentType> = {
@@ -22,6 +24,8 @@ const STEP_COMPONENTS: Record<string, ComponentType> = {
   frequency: FrequencyStep,
   generating: GeneratingPlanStep,
   "plan-preview": PlanPreviewStep,
+  email: EmailStep,
+  "sign-in": SignInStep,
   paywall: PaywallStep,
 };
 

@@ -17,5 +17,7 @@ export const flow: FunnelStep[] = [
   { id: "frequency" },
   { id: "generating" },
   { id: "plan-preview" },
+  { id: "email", when: (a) => !a.userEmail },
+  { id: "sign-in", when: (a) => !a.firebaseUid },
   { id: "paywall" },
 ];
