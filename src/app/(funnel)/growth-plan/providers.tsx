@@ -31,13 +31,15 @@ function AmplitudeBootstrap() {
       setAmplitudeUserId(answers.firebaseUid);
     }
 
-    // Mirror all known answers as user properties so every subsequent event
-    // is automatically enriched for cohort analysis in dashboards.
+    // Mirror all known Lexi answers as user properties so every event is
+    // automatically enriched for cohort analysis in dashboards.
     const props: Record<string, string | boolean> = {};
-    if (answers.goal) props.goal = answers.goal;
-    if (answers.ageRange) props.age_range = answers.ageRange;
-    if (answers.currentState) props.current_state = answers.currentState;
-    if (answers.frequency) props.frequency = answers.frequency;
+    if (answers.peaceBreaker) props.peace_breaker = answers.peaceBreaker;
+    if (answers.overthinking) props.overthinking = answers.overthinking;
+    if (answers.digitalAnxiety) props.digital_anxiety = answers.digitalAnxiety;
+    if (answers.friendGroup) props.friend_group = answers.friendGroup;
+    if (answers.projection) props.projection = answers.projection;
+    if (answers.reinforcement) props.reinforcement = answers.reinforcement;
     if (answers.userEmail) props.email_captured = true;
     if (answers.firebaseUid) props.signed_in = true;
 

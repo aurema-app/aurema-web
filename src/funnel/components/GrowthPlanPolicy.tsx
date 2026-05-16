@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import { Text } from "@chakra-ui/react";
 
 export function GrowthPlanPolicy() {
@@ -11,28 +13,24 @@ export function GrowthPlanPolicy() {
       textAlign="center"
       lineHeight="1.5"
     >
-      By continuing you agree to Aurema&apos;s{" "}
-      <Text
-        as="a"
+      By continuing you agree to Lexi&apos;s{" "}
+      <Link
         href="/terms"
         target="_blank"
         rel="noopener noreferrer"
-        textDecoration="underline"
-        _hover={{ color: "fg.default" }}
+        style={{ textDecoration: "underline" }}
       >
         Terms of Service
-      </Text>{" "}
+      </Link>{" "}
       and{" "}
-      <Text
-        as="a"
+      <Link
         href="/privacy"
         target="_blank"
         rel="noopener noreferrer"
-        textDecoration="underline"
-        _hover={{ color: "fg.default" }}
+        style={{ textDecoration: "underline" }}
       >
         Privacy Policy
-      </Text>
+      </Link>
       . Subscription renews automatically. Cancel any time.
     </Text>
   );

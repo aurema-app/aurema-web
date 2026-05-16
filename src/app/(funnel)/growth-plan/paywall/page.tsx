@@ -1,8 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+
 import { useRouter } from "next/navigation";
+
 import { Box, Button, Spinner, Text, VStack } from "@chakra-ui/react";
+import { motion } from "framer-motion";
 import type {
   Offerings,
   Package,
@@ -10,8 +13,8 @@ import type {
 } from "@revenuecat/purchases-js";
 import { PackageType } from "@revenuecat/purchases-js";
 
-import { FunnelHeader } from "@/funnel/components/FunnelHeader";
 import { GrowthPlanPolicy } from "@/funnel/components/GrowthPlanPolicy";
+import { LexiAvatar } from "@/funnel/components/lexi/LexiAvatar";
 import {
   configureRevenueCat,
   getRevenueCat,
@@ -24,8 +27,20 @@ type PageState =
   | { kind: "loading" }
   | { kind: "ready"; offerings: Offerings }
   | { kind: "no-offerings" }
-  | { kind: "purchasing" }
   | { kind: "error"; message: string };
+
+const VALUE_PROPS = [
+  "Break toxic emotional cycles before attachment locks in.",
+  "Stop confusing situational anxiety with a deep connection.",
+  "Get a custom response strategy: Know exactly what to text next.",
+  "Get what your friends are tired of repeating.",
+] as const;
+
+const TRUST_BADGES = [
+  "Safe & Secure Checkout",
+  "Instant Digital Delivery",
+  "Cancel Anytime",
+] as const;
 
 function packageLabel(pkg: Package): string {
   switch (pkg.packageType) {
@@ -38,15 +53,54 @@ function packageLabel(pkg: Package): string {
   }
 }
 
-function packagePeriodNote(pkg: Package): string {
+function packageNote(pkg: Package): string {
   switch (pkg.packageType) {
     case PackageType.Annual:
-      return "per year · best value";
+      return "Best value · per year";
     case PackageType.Monthly:
-      return "per month";
+      return "Cancel anytime · per month";
     default:
       return "";
   }
+}
+
+function PageShell({ children }: { children: React.ReactNode }) {
+  return (
+    <Box
+      minH="100dvh"
+      bg="bg.canvas"
+      display="flex"
+      flexDirection="column"
+      alignItems="center"
+    >
+      <Box
+        w="full"
+        maxW="420px"
+        flex="1"
+        display="flex"
+        flexDirection="column"
+        px={5}
+        pt={8}
+        pb={10}
+      >
+        {/* Wordmark */}
+        <Text
+          fontFamily="heading"
+          fontSize="2xl"
+          fontWeight="800"
+          color="fg.default"
+          textAlign="center"
+          mb={6}
+        >
+          Lexi
+          <Text as="span" color="brand.primary" fontSize="xl" ml="1px">
+            ♥
+          </Text>
+        </Text>
+        {children}
+      </Box>
+    </Box>
+  );
 }
 
 export default function PaywallPage() {
@@ -57,16 +111,14 @@ export default function PaywallPage() {
   const [state, setState] = useState<PageState>({ kind: "loading" });
   const [selectedPkg, setSelectedPkg] = useState<Package | null>(null);
   const [purchaseError, setPurchaseError] = useState<string | null>(null);
+  const [isPurchasing, setIsPurchasing] = useState(false);
 
-  // Guard: must be signed in to reach this page.
   useEffect(() => {
     if (!answers.firebaseUid) {
       router.replace("/growth-plan/sign-in");
       return;
     }
 
-    // Re-configure RC on page load to handle cases where the user navigated
-    // directly or refreshed (RC configure is idempotent for the same user).
     configureRevenueCat(answers.firebaseUid);
 
     let cancelled = false;
@@ -85,7 +137,6 @@ export default function PaywallPage() {
           return;
         }
 
-        // Default selection: annual > monthly > first available.
         const defaultPkg =
           offerings.current.annual ??
           offerings.current.monthly ??
@@ -99,7 +150,6 @@ export default function PaywallPage() {
             (p) => p.identifier,
           ),
           default_package: defaultPkg.identifier,
-          default_package_type: defaultPkg.packageType,
         });
       } catch (err: unknown) {
         if (cancelled) return;
@@ -113,14 +163,13 @@ export default function PaywallPage() {
     return () => {
       cancelled = true;
     };
-    // Only run when firebaseUid changes, not on every answers update.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [answers.firebaseUid]);
 
   const handlePurchase = async () => {
     if (!selectedPkg) return;
     setPurchaseError(null);
-    setState({ kind: "purchasing" });
+    setIsPurchasing(true);
 
     track(EVENTS.PURCHASE_STARTED, {
       package_id: selectedPkg.identifier,
@@ -135,7 +184,7 @@ export default function PaywallPage() {
         rcPackage: selectedPkg,
         htmlTarget: checkoutRef.current ?? undefined,
         customerEmail: answers.userEmail,
-        metadata: { source: "growth-plan" },
+        metadata: { source: "lexi-funnel" },
       });
 
       setAmplitudeUserProperties({
@@ -150,19 +199,16 @@ export default function PaywallPage() {
       });
       router.push("/growth-plan/activate");
     } catch (err: unknown) {
-      // ErrorCode 1 == UserCancelledError — don't show an error message.
       const rcErr = err as PurchasesError;
       if (rcErr?.errorCode === 1) {
-        setState((prev) =>
-          prev.kind === "purchasing"
-            ? { kind: "ready", offerings: prev as never }
-            : prev,
-        );
-        // Re-fetch state since we may have lost it during purchasing state.
+        // User cancelled — restore offerings without surfacing an error.
+        setIsPurchasing(false);
         const rc = getRevenueCat();
-        const offerings = await rc.getOfferings().catch(() => null);
+        const restored = await rc.getOfferings().catch(() => null);
         setState(
-          offerings ? { kind: "ready", offerings } : { kind: "no-offerings" },
+          restored
+            ? { kind: "ready", offerings: restored }
+            : { kind: "no-offerings" },
         );
         return;
       }
@@ -172,63 +218,43 @@ export default function PaywallPage() {
           ? err.message
           : "Payment failed. Please try again.";
       setPurchaseError(msg);
+      setIsPurchasing(false);
       track(EVENTS.PURCHASE_FAILED, {
         package_id: selectedPkg.identifier,
-        package_type: selectedPkg.packageType,
         error: msg,
       });
 
-      // Restore ready state so user can retry.
       const rc = getRevenueCat();
-      const offerings = await rc.getOfferings().catch(() => null);
+      const restored = await rc.getOfferings().catch(() => null);
       setState(
-        offerings ? { kind: "ready", offerings } : { kind: "no-offerings" },
+        restored
+          ? { kind: "ready", offerings: restored }
+          : { kind: "no-offerings" },
       );
     }
   };
 
-  const Shell = ({ children }: { children: React.ReactNode }) => (
-    <Box minH="100vh" bg="bg.canvas" display="flex" flexDirection="column">
-      <FunnelHeader />
-      <Box
-        flex="1"
-        display="flex"
-        flexDirection="column"
-        alignItems="center"
-        px={4}
-        pt={8}
-        pb={10}
-        maxW="480px"
-        mx="auto"
-        w="full"
-        gap={6}
-      >
-        {children}
-      </Box>
-    </Box>
-  );
-
   if (state.kind === "loading") {
     return (
-      <Shell>
-        <VStack gap={3} align="center" flex="1" justify="center">
+      <PageShell>
+        <VStack flex="1" justify="center" gap={3}>
           <Spinner size="lg" color="brand.primary" />
-          <Text fontFamily="body" fontSize="sm" color="fg.muted">
-            Loading your plan…
+          <Text fontSize="sm" color="fg.muted" fontWeight="500">
+            Preparing your read...
           </Text>
         </VStack>
-      </Shell>
+      </PageShell>
     );
   }
 
   if (state.kind === "no-offerings" || state.kind === "error") {
     return (
-      <Shell>
-        <VStack gap={4} align="stretch" flex="1" justify="center">
+      <PageShell>
+        <VStack flex="1" justify="center" gap={4} align="stretch">
           <Text
-            fontFamily="heading"
+            fontFamily="body"
             fontSize="xl"
-            fontWeight="bold"
+            fontWeight="800"
             color="fg.default"
             textAlign="center"
           >
@@ -236,135 +262,257 @@ export default function PaywallPage() {
               ? "Something went wrong"
               : "Plans unavailable"}
           </Text>
-          <Text
-            fontFamily="body"
-            fontSize="sm"
-            color="fg.muted"
-            textAlign="center"
-          >
+          <Text fontSize="sm" color="fg.muted" textAlign="center">
             {state.kind === "error"
               ? state.message
-              : "We couldn't load the available plans. Please try again later."}
+              : "We couldn't load plans right now. Please try again later."}
           </Text>
           <Button
-            onClick={() => router.push("/growth-plan/intro")}
+            bg="brand.primary"
+            color="white"
+            borderRadius="full"
             fontFamily="body"
             fontWeight="700"
-            bg="brand.primary"
-            color="bg.canvas"
-            size="lg"
-            borderRadius="xl"
+            onClick={() => router.push("/growth-plan/landing")}
             _hover={{ opacity: 0.9 }}
           >
             Start over
           </Button>
         </VStack>
-      </Shell>
+      </PageShell>
     );
   }
 
-  const offering = state.offerings.current!;
-  const packages = offering.availablePackages;
+  if (state.kind !== "ready") return null;
+  const packages: Package[] = state.offerings.current?.availablePackages ?? [];
 
   return (
-    <Shell>
-      <VStack gap={2} align="center" w="full">
-        <Text
-          fontFamily="heading"
-          fontSize="2xl"
-          fontWeight="bold"
-          color="fg.default"
-          textAlign="center"
+    <PageShell>
+      <VStack gap={6} align="stretch" flex="1">
+        {/* Mascot */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.4 }}
+          style={{ textAlign: "center" }}
         >
-          Unlock your growth plan
-        </Text>
-        <Text
-          fontFamily="body"
-          fontSize="sm"
-          color="fg.muted"
-          textAlign="center"
+          <LexiAvatar mood="soft" size="md" />
+        </motion.div>
+
+        {/* Hook */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.1 }}
         >
-          Choose the plan that works for you.
-        </Text>
-      </VStack>
+          <Text
+            fontFamily="body"
+            fontSize={{ base: "xl", md: "2xl" }}
+            fontWeight="900"
+            color="fg.default"
+            lineHeight="1.3"
+            letterSpacing="-0.5px"
+            textAlign="center"
+          >
+            Stop romanticizing people who{" "}
+            <Text as="span" color="brand.primary">
+              never choose you clearly.
+            </Text>
+          </Text>
+        </motion.div>
 
-      {/* Package selector */}
-      <VStack gap={3} align="stretch" w="full">
-        {packages.map((pkg) => {
-          const isSelected = selectedPkg?.identifier === pkg.identifier;
-          return (
-            <Box
-              key={pkg.identifier}
-              as="button"
-              onClick={() => setSelectedPkg(pkg)}
-              w="full"
-              textAlign="left"
-              borderRadius="xl"
-              border="2px solid"
-              borderColor={isSelected ? "brand.primary" : "whiteAlpha.200"}
-              bg={isSelected ? "whiteAlpha.100" : "transparent"}
-              px={5}
-              py={4}
-              cursor="pointer"
-              transition="all 0.15s ease"
-              _hover={{ borderColor: "brand.primary", bg: "whiteAlpha.50" }}
-            >
-              <Text
-                fontFamily="heading"
-                fontSize="md"
-                fontWeight="bold"
-                color="fg.default"
-                mb={0.5}
-              >
-                {packageLabel(pkg)}
-              </Text>
-              <Text fontFamily="body" fontSize="sm" color="fg.muted">
-                {pkg.webBillingProduct.currentPrice.formattedPrice}{" "}
-                {packagePeriodNote(pkg)}
-              </Text>
-            </Box>
-          );
-        })}
-      </VStack>
-
-      {/* RC embeds its checkout UI here on purchase() call */}
-      <Box ref={checkoutRef} w="full" />
-
-      {purchaseError && (
-        <Text
-          fontFamily="body"
-          fontSize="sm"
-          color="red.400"
-          textAlign="center"
+        {/* Value props */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.35, delay: 0.2 }}
         >
-          {purchaseError}
-        </Text>
-      )}
-
-      <Button
-        onClick={handlePurchase}
-        disabled={!selectedPkg || state.kind === "purchasing"}
-        w="full"
-        size="lg"
-        borderRadius="xl"
-        fontFamily="body"
-        fontWeight="700"
-        bg="brand.primary"
-        color="bg.canvas"
-        _hover={{ opacity: 0.9 }}
-        _disabled={{ opacity: 0.4, cursor: "not-allowed" }}
-      >
-        {state.kind === "purchasing" ? (
-          <VStack gap={1} align="center">
-            <Spinner size="sm" />
-            <span>Processing…</span>
+          <VStack gap={3} align="stretch">
+            {VALUE_PROPS.map((prop) => (
+              <Box key={prop} display="flex" gap={3} alignItems="flex-start">
+                <Box
+                  w="20px"
+                  h="20px"
+                  borderRadius="full"
+                  bg="lexi.pinkLight"
+                  border="1.5px solid"
+                  borderColor="brand.primary"
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                  flexShrink={0}
+                  mt="1px"
+                >
+                  <Text fontSize="9px" color="brand.primary" fontWeight="900">
+                    ✓
+                  </Text>
+                </Box>
+                <Text
+                  fontSize="sm"
+                  fontWeight="600"
+                  color="fg.default"
+                  lineHeight="1.5"
+                >
+                  {prop}
+                </Text>
+              </Box>
+            ))}
           </VStack>
-        ) : (
-          "Start my plan"
-        )}
-      </Button>
+        </motion.div>
 
-      <GrowthPlanPolicy />
-    </Shell>
+        {/* Pricing cards */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.3 }}
+        >
+          <VStack gap={3} align="stretch">
+            {packages.map((pkg, i) => {
+              const isSelected = selectedPkg?.identifier === pkg.identifier;
+              const isMostPopular = i === 0;
+
+              return (
+                <Box
+                  key={pkg.identifier}
+                  as="button"
+                  onClick={() => setSelectedPkg(pkg)}
+                  w="full"
+                  textAlign="left"
+                  borderRadius="2xl"
+                  border="2px solid"
+                  borderColor={isSelected ? "brand.primary" : "border.light"}
+                  bg={isSelected ? "lexi.pinkLight" : "card.bg"}
+                  px={5}
+                  py={4}
+                  cursor="pointer"
+                  transition="all 0.18s"
+                  position="relative"
+                  boxShadow={
+                    isSelected ? "0 4px 20px rgba(255,125,186,0.2)" : "none"
+                  }
+                  _hover={{ borderColor: "brand.primary" }}
+                >
+                  {isMostPopular && (
+                    <Box
+                      position="absolute"
+                      top="-10px"
+                      left="16px"
+                      px={3}
+                      py={0.5}
+                      borderRadius="full"
+                      bg="brand.primary"
+                    >
+                      <Text
+                        fontSize="9px"
+                        fontWeight="800"
+                        color="white"
+                        letterSpacing="wider"
+                        textTransform="uppercase"
+                      >
+                        Most Popular
+                      </Text>
+                    </Box>
+                  )}
+
+                  <Box
+                    display="flex"
+                    justifyContent="space-between"
+                    alignItems="flex-start"
+                  >
+                    <Box>
+                      <Text
+                        fontFamily="body"
+                        fontSize="md"
+                        fontWeight="800"
+                        color="fg.default"
+                      >
+                        {packageLabel(pkg)}
+                      </Text>
+                      <Text
+                        fontSize="xs"
+                        color="fg.muted"
+                        fontWeight="500"
+                        mt={0.5}
+                      >
+                        {packageNote(pkg)}
+                      </Text>
+                    </Box>
+                    <Text
+                      fontFamily="body"
+                      fontSize="xl"
+                      fontWeight="900"
+                      color={isSelected ? "brand.primary" : "fg.default"}
+                    >
+                      {pkg.webBillingProduct.currentPrice.formattedPrice}
+                    </Text>
+                  </Box>
+                </Box>
+              );
+            })}
+          </VStack>
+        </motion.div>
+
+        {/* RC checkout mount point */}
+        <Box ref={checkoutRef} w="full" />
+
+        {purchaseError && (
+          <Text
+            fontSize="sm"
+            color="red.400"
+            textAlign="center"
+            fontWeight="600"
+          >
+            {purchaseError}
+          </Text>
+        )}
+
+        {/* CTA */}
+        <Button
+          bg="brand.primary"
+          color="white"
+          borderRadius="full"
+          py={7}
+          w="full"
+          fontFamily="body"
+          fontWeight="700"
+          fontSize="lg"
+          disabled={!selectedPkg || isPurchasing}
+          _hover={{
+            transform: "translateY(-2px)",
+            boxShadow: "0 12px 32px rgba(255,125,186,0.45)",
+          }}
+          _active={{ transform: "translateY(0)" }}
+          _disabled={{ opacity: 0.5, cursor: "not-allowed" }}
+          transition="all 0.2s"
+          onClick={handlePurchase}
+        >
+          {isPurchasing ? (
+            <Box display="flex" alignItems="center" gap={2}>
+              <Spinner size="sm" />
+              <Text>Processing…</Text>
+            </Box>
+          ) : (
+            "Get Instant Clarity"
+          )}
+        </Button>
+
+        {/* Trust badges */}
+        <Box display="flex" justifyContent="center" gap={4} flexWrap="wrap">
+          {TRUST_BADGES.map((badge) => (
+            <Text
+              key={badge}
+              fontSize="10px"
+              color="fg.muted"
+              fontWeight="600"
+              letterSpacing="wide"
+            >
+              🔒 {badge}
+            </Text>
+          ))}
+        </Box>
+
+        <GrowthPlanPolicy />
+      </VStack>
+    </PageShell>
   );
 }

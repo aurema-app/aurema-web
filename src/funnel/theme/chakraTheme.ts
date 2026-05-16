@@ -1,30 +1,40 @@
 import { createSystem, defaultConfig, defineConfig } from "@chakra-ui/react";
 
+// Lexi color palette — from character sheet:
+// Pink: #FF7DBA | Lavender: #C7A6F7 | Skin: #FFBB88 | Neutral bg: #F2F2F6
+
 const config = defineConfig({
   theme: {
     tokens: {
       colors: {
-        brand: {
-          bg: { value: "#212529" },
-          fg: { value: "#f0f0f0" },
-          muted: { value: "#adb5bd" },
-          accent: { value: "#a3b8ff" },
-          lilac: { value: "#f5e0f8" },
+        lexi: {
+          pink: { value: "#FF7DBA" },
+          pinkLight: { value: "#FFE8F3" },
+          lavender: { value: "#C7A6F7" },
+          lavenderLight: { value: "#EDE5FF" },
+          charcoal: { value: "#1A1A2E" },
+          muted: { value: "#7C7C9A" },
+          bg: { value: "#FAFAFF" },
+          card: { value: "#FFFFFF" },
+          border: { value: "#EAEAF4" },
+          skin: { value: "#FFBB88" },
         },
       },
       fonts: {
+        // Quicksand — friendly, rounded, Gen Z energy
         body: { value: "var(--font-quicksand), system-ui, sans-serif" },
-        heading: {
-          value: "var(--font-cormorant-garamond), Georgia, serif",
-        },
+        heading: { value: "var(--font-quicksand), system-ui, sans-serif" },
       },
     },
     semanticTokens: {
       colors: {
-        "bg.canvas": { value: "{colors.brand.bg}" },
-        "fg.default": { value: "{colors.brand.fg}" },
-        "fg.muted": { value: "{colors.brand.muted}" },
-        "brand.primary": { value: "{colors.brand.accent}" },
+        "bg.canvas": { value: "{colors.lexi.bg}" },
+        "fg.default": { value: "{colors.lexi.charcoal}" },
+        "fg.muted": { value: "{colors.lexi.muted}" },
+        "brand.primary": { value: "{colors.lexi.pink}" },
+        "brand.secondary": { value: "{colors.lexi.lavender}" },
+        "card.bg": { value: "{colors.lexi.card}" },
+        "border.light": { value: "{colors.lexi.border}" },
       },
     },
   },

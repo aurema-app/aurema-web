@@ -17,7 +17,7 @@ export function ProgressBar() {
       <Box
         h="2px"
         w="full"
-        bg="whiteAlpha.200"
+        bg="border.light"
         borderRadius="full"
         overflow="hidden"
       >

@@ -2,22 +2,25 @@ import type { FunnelAnswers } from "@/funnel/state/types";
 
 export type FunnelStep = {
   id: string;
-  // Optional gate: step is skipped when predicate returns false.
-  // Phase 3+ will use this for conditional screens (e.g. email step when not signed in).
   when?: (answers: FunnelAnswers) => boolean;
 };
 
-// Ordered list of step IDs. Components live in [stepId]/page.tsx's registry
-// to avoid a circular-import cycle (steps → useFunnelNavigation → flow → steps).
+// Lexi situationship analyzer — 13-screen flow.
+// Components live in [stepId]/page.tsx's registry to avoid circular imports.
 export const flow: FunnelStep[] = [
-  { id: "intro" },
-  { id: "goal" },
-  { id: "age" },
-  { id: "current-state" },
-  { id: "frequency" },
-  { id: "generating" },
-  { id: "plan-preview" },
-  { id: "email", when: (a) => !a.userEmail },
-  { id: "sign-in", when: (a) => !a.firebaseUid },
-  { id: "paywall" },
+  { id: "landing" }, // Screen 1 — Emotional hook
+  { id: "social-proof" }, // Screen 2 — Real-time validation
+  { id: "peace-breaker" }, // Screen 3 — Fast-tap icebreaker
+  { id: "overthinking" }, // Screen 4 — Overthinking scan
+  { id: "digital-anxiety" }, // Screen 5 — Digital anxiety scan
+  { id: "friend-group" }, // Screen 6 — Friend group check
+  { id: "projection" }, // Screen 7 — Projection scan
+  { id: "reinforcement" }, // Screen 8 — Intermittent reinforcement check
+  { id: "pattern-detected" }, // Screen 9 — Identity label setup
+  { id: "evidence" }, // Screen 10 — Evidence drop
+  { id: "analyzing" }, // Screen 11 — Dynamic loading + LLM call
+  { id: "teaser" }, // Screen 12 — Custom teaser
+  { id: "email", when: (a) => !a.userEmail }, // Lead capture
+  { id: "sign-in", when: (a) => !a.firebaseUid }, // Auth gate
+  { id: "paywall" }, // Screen 13 — Paywall (redirects to /growth-plan/paywall)
 ];

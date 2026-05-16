@@ -4,7 +4,7 @@ Single source of truth for where we are. Agents: update this at the end of every
 
 ## Current phase
 
-**Phases 7 + 8 — Experiments + Analytics — COMPLETE (2026-05-16)**
+**Lexi Funnel Rebrand — COMPLETE (2026-05-16)**
 
 ## Phase checklist
 
@@ -70,15 +70,15 @@ Single source of truth for where we are. Agents: update this at the end of every
 
 - **Phase 6 (2026-05-16)**: Paywall and activate pages built. `src/app/(funnel)/growth-plan/paywall/page.tsx` — fetches offerings from RC, renders monthly/annual package selector cards, calls `purchases.purchase({rcPackage, htmlTarget, customerEmail, metadata})`, shows inline error on failure. `src/app/(funnel)/growth-plan/activate/page.tsx` — polls `/api/user` every 500ms for 10s, falls back to `purchases.getCustomerInfo()` if backend unreachable/timeout, shows success (App Store + Play Store CTAs) or soft-pending state. `src/app/api/user/route.ts` — thin Next.js proxy to `aurema-backend` with 3s timeout. `src/funnel/components/GrowthPlanPolicy.tsx` — shared T&Cs/privacy link block. `configureRevenueCat` wired into `SignInStep` (Google + Apple) and `verify/page.tsx` (email-link). `PaywallStep.tsx` updated to redirect to `/growth-plan/paywall` since the dedicated page takes precedence. **Entitlement ID hardcoded as `'pro'`** — must be confirmed against mobile before marking Phase 5/6 complete. App Store / Play Store URLs in `activate/page.tsx` are placeholders (`id000000000`) — update before launch.
 
+- **Lexi Funnel Rebrand (2026-05-16)**: Complete visual and copy overhaul of the growth-plan funnel. Lexi is the new mascot (situationship advisor — "Zero patience. Big heart."). Color system updated: `#FF7DBA` pink primary, `#C7A6F7` lavender secondary, `#FAFAFF` bg.canvas, charcoal text. New 13-screen flow: `landing → social-proof → peace-breaker → overthinking → digital-anxiety → friend-group → projection → reinforcement → pattern-detected → evidence → analyzing → teaser → email → sign-in → paywall`. All 6 quiz steps (3–8) use a shared `QuizStep` template component with `feedbackRules` + `autoAdvance` props. `AnalyzingStep` fires a real POST to `/api/lexi/analyze` (gpt-4o-mini, graceful fallback when `OPENAI_API_KEY` unset). `TeaserStep` displays the extracted phrase + pattern. `PatternDetectedStep` (Screen 9) shows animated progress bars as a "scan detected" illusion. `EvidenceStep` (Screen 10) has text area, quick-chip excuses, and file upload option. Landing screen shows the Lexi hero.png image prominently. Mascot represented with emoji avatars (`LexiAvatar`) across all other screens. `FunnelAnswers` storage key bumped to `v2` (old `v1` cache auto-discarded). Old Aurema step files deleted (GoalStep, AgeStep, CurrentStateStep, FrequencyStep, GeneratingPlanStep, PlanPreviewStep, IntroStep, intro/ dir). `providers.tsx` updated to sync new Lexi answer keys as Amplitude user properties. Pre-existing Chakra v3 `Button/Text as="a"` errors in `activate/page.tsx` and `GrowthPlanPolicy.tsx` fixed using Next.js `<Link>`. `OPENAI_API_KEY` added to `.env.example`. Zero TypeScript errors.
+
 - **Phase 4 (2026-04-19)**: Firebase Auth wired (Google, Apple-flagged, email-link passwordless). `aurema-backend` gains `POST /api/funnel/leads` (Firestore `funnel_leads` collection, auto-id, inline rate-limiter, no new deps). Frontend: `firebaseClient.ts`, `leadsClient.ts`, `authActionCode.ts` (no `linkDomain` — deferred), `useFirebaseUser.ts` hook, `EmailStep`, `SignInStep` (with 30s resend throttle + Google/Apple fallbacks in "Check your email" view), `/growth-plan/verify` page (same-device + different-device cases). Flow extended to 10 steps: `…plan-preview → email → sign-in → paywall` with `when` predicates skipping already-captured/signed-in users. `PlanPreviewStep` now uses `goNext()` so predicates route correctly. `NEXT_PUBLIC_APPLE_SIGNIN_ENABLED=false` gates Apple button. Backend controller unit test deferred — follow-up. CORS: production aurema-web host not yet in allow-list (flag for deploy).
 
 ## Next session — suggested start
 
-**Phase 7: Experiments (Amplitude Experiment).**
-
 **Phase 9: QA + deploy.** Before starting:
 
-1. Fill in `.env.local` from `.env.example` — Firebase, RC, Amplitude, backend URL.
+1. Fill in `.env.local` from `.env.example` — Firebase, RC, Amplitude, backend URL, `OPENAI_API_KEY` (optional for Lexi LLM).
 2. RC dashboard: complete the Phase 5 dashboard checklist.
 3. Backend: update `webhookController.js` with `subscriptionSource` + unit test.
 4. Confirm entitlement ID is `'pro'` (or update `ENTITLEMENT_ID` in `activate/page.tsx`).
@@ -88,6 +88,7 @@ Single source of truth for where we are. Agents: update this at the end of every
 8. Create flag `funnel-intro-hero` in Amplitude Experiment, variants `control` / `variant-a`.
 9. Add `localhost` + `aurema-app.com` to Firebase Console → Auth → Authorized domains.
 10. Full sandbox run: Stripe test card `4242 4242 4242 4242` → confirm activate page + Amplitude events.
+11. Lexi hero.png and sheet.png are in `public/lexi/` — confirm they load in production (Next.js Image optimization, no CDN auth needed).
 
 ## Prompt template for phases
 

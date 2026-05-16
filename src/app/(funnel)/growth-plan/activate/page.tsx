@@ -1,6 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+
+import Link from "next/link";
+
 import { Box, Button, Spinner, Text, VStack } from "@chakra-ui/react";
 
 import { getRevenueCat } from "@/funnel/services/revenueCatClient";
@@ -154,30 +157,27 @@ export default function ActivatePage() {
           <Text fontFamily="body" fontSize="sm" color="fg.muted">
             If you don&apos;t see your subscription active in the app shortly,
             reach out:{" "}
-            <Text
-              as="a"
+            <Link
               href={`mailto:${SUPPORT_EMAIL}`}
-              textDecoration="underline"
-              color="fg.default"
+              style={{ textDecoration: "underline" }}
             >
               {SUPPORT_EMAIL}
-            </Text>
+            </Link>
           </Text>
-          <Button
-            as="a"
-            href={APP_STORE_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            fontFamily="body"
-            fontWeight="700"
-            bg="brand.primary"
-            color="bg.canvas"
-            size="lg"
-            borderRadius="xl"
-            _hover={{ opacity: 0.9 }}
-          >
-            Open Aurema on iPhone
-          </Button>
+          <Link href={APP_STORE_URL} target="_blank" rel="noopener noreferrer">
+            <Button
+              fontFamily="body"
+              fontWeight="700"
+              bg="brand.primary"
+              color="bg.canvas"
+              size="lg"
+              borderRadius="xl"
+              _hover={{ opacity: 0.9 }}
+              w="full"
+            >
+              Open Aurema on iPhone
+            </Button>
+          </Link>
         </VStack>
       </Shell>
     );
@@ -206,38 +206,36 @@ export default function ActivatePage() {
           session — your subscription is already synced.
         </Text>
 
-        <Button
-          as="a"
-          href={APP_STORE_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          fontFamily="body"
-          fontWeight="700"
-          bg="brand.primary"
-          color="bg.canvas"
-          size="lg"
-          borderRadius="xl"
-          _hover={{ opacity: 0.9 }}
-        >
-          Open Aurema on iPhone
-        </Button>
+        <Link href={APP_STORE_URL} target="_blank" rel="noopener noreferrer">
+          <Button
+            fontFamily="body"
+            fontWeight="700"
+            bg="brand.primary"
+            color="bg.canvas"
+            size="lg"
+            borderRadius="xl"
+            _hover={{ opacity: 0.9 }}
+            w="full"
+          >
+            Open Aurema on iPhone
+          </Button>
+        </Link>
 
-        <Button
-          as="a"
-          href={PLAY_STORE_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          fontFamily="body"
-          fontWeight="700"
-          variant="outline"
-          borderColor="whiteAlpha.300"
-          color="fg.default"
-          size="lg"
-          borderRadius="xl"
-          _hover={{ bg: "whiteAlpha.100" }}
-        >
-          Open Aurema on Android
-        </Button>
+        <Link href={PLAY_STORE_URL} target="_blank" rel="noopener noreferrer">
+          <Button
+            fontFamily="body"
+            fontWeight="700"
+            variant="outline"
+            borderColor="whiteAlpha.300"
+            color="fg.default"
+            size="lg"
+            borderRadius="xl"
+            _hover={{ bg: "whiteAlpha.100" }}
+            w="full"
+          >
+            Open Aurema on Android
+          </Button>
+        </Link>
 
         <Button
           onClick={() => {
