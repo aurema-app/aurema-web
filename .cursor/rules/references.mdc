@@ -1,0 +1,42 @@
+---
+description: Reference implementations in the sibling web-funnel repo to consult for patterns
+alwaysApply: true
+---
+
+# Reference implementations (read-only)
+
+The sibling workplace monorepo at `/Users/senolfratila/work/web-funnel/` has mature implementations of similar funnel primitives. **Consult for patterns, do not import from, do not copy wholesale.**
+
+## Useful folders
+
+- `web-funnel/packages/ui/src/growth-plan/` — step primitives (`OptionText`, `OptionWithImage`, `ProgressBar`, `AutoLoadingBar`, etc.)
+- `web-funnel/packages/ui/src/growth-plan/custom-steps/` — non-trivial step layouts
+- `web-funnel/apps/deepstash/src/growth-plan/` — how steps are composed into flows
+- `web-funnel/apps/deepstash/src/constants/experiments.ts` — experiment registry pattern
+- `web-funnel/packages/ui/src/providers/` — context providers (but we use less of this)
+
+## Important differences — always adapt, never copy verbatim
+
+| Aspect | web-funnel (workplace) | aurema-web (this repo) |
+|--------|------------------------|------------------------|
+| UI | Chakra **v2** + emotion | Chakra **v3** |
+| App shape | Turborepo monorepo, `@repo/ui` imports | Single Next app, local imports |
+| Experiments | SSR variant resolution + cookies | Client-side flags only |
+| Payments | Stripe Elements directly, custom backend | RevenueCat Web Billing (`purchases-js`) |
+| Attribution | Full attribution stack (FB, TikTok, etc.) | None |
+| Paywalls | Multiple paywall variants, complex offer engine | One paywall page |
+
+If you see `@repo/ui` imports, theme syntax like `useStyleConfig`, or Chakra v2 `extendTheme` in reference files, **translate to Chakra v3 idioms** — don't paste them as-is.
+
+## When to consult
+
+- **Phase 2** (step primitives): `packages/ui/src/growth-plan/Option*.tsx`, `ProgressBar.tsx`, `AutoLoadingBar.tsx`
+- **Phase 3** (generating + plan preview): `packages/ui/src/growth-plan/GenerateGrowthPlanPersonalize.tsx`
+- **Phase 7** (experiments): `apps/deepstash/src/constants/experiments.ts` and any `useVariant` equivalent
+- **Phase 8** (analytics): any `track()` wrapper in `packages/ui/src/` or `apps/deepstash/src/analytics/`
+
+## When NOT to consult
+
+- **Phase 5 / 6** (payments): workplace uses Stripe Elements directly. We use RevenueCat Web Billing — the API surface is completely different. Use `docs/funnel/03-payments.md` and the RevenueCat docs, not web-funnel.
+- **Auth**: workplace has its own auth patterns that don't apply. Firebase is our source of truth.
+- **Attribution / ad SDKs**: out of scope for Aurema.

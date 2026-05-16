@@ -1,0 +1,54 @@
+---
+description: How to add and remove Amplitude experiments in the funnel
+globs: src/funnel/**
+alwaysApply: false
+---
+
+# Experiments
+
+We use **Amplitude Experiment** for client-side variant flags. No SSR, no custom allocation, no cookie-sticky server logic.
+
+## Source of truth
+
+- Flag keys and allowed variant names live in `src/funnel/experiments/experiments.constants.ts`.
+- The flag is **also** defined in the Amplitude Experiment dashboard with matching variants.
+- Never reference a flag key by string literal outside `experiments.constants.ts`.
+
+## Adding an experiment
+
+1. Add the flag key + variants to `experiments.constants.ts`:
+
+```ts
+export const EXPERIMENTS = {
+  INTRO_HERO: {
+    key: 'funnel-intro-hero',
+    variants: ['control', 'variant-a'] as const,
+  },
+} as const
+```
+
+2. In the component, call `useVariant`:
+
+```ts
+const variant = useVariant(EXPERIMENTS.INTRO_HERO)
+
+if (variant === 'variant-a') return <IntroHeroVariantA />
+return <IntroHeroControl />
+```
+
+3. Fire an Amplitude exposure event automatically on first read (handled by `useVariant`). Do NOT fire it manually.
+
+4. If the variant changes step content, create a **separate step component file per variant** (`IntroHeroControl.tsx`, `IntroHeroVariantA.tsx`). Don't branch inline beyond a simple switch at the top.
+
+## Removing an experiment
+
+1. Pick the winning variant.
+2. Inline its behavior into the default component.
+3. Delete the losing variant file(s) and the flag entry in `experiments.constants.ts`.
+4. Archive the flag in the Amplitude dashboard.
+5. Update `docs/funnel/04-experiments.md`.
+
+## Don'ts
+
+- No feature flags for permanent config — use env vars.
+- No server-rendered variant decisions. First paint can briefly show control; that's acceptable here.

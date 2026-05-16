@@ -1,0 +1,72 @@
+---
+description: Firebase Auth usage in the funnel - Google, Apple, email-link (passwordless)
+globs: src/funnel/**,src/app/(funnel)/**
+alwaysApply: false
+---
+
+# Auth — Firebase
+
+The funnel uses **Firebase Auth** on the client. Three sign-in paths, in order of preference on the UI:
+
+1. **Continue with Google** — standard OAuth popup/redirect.
+2. **Continue with Apple** — OAuth via Apple Services ID (only rendered when `NEXT_PUBLIC_APPLE_SIGNIN_ENABLED === 'true'`).
+3. **Continue with email** — **email-link (passwordless)**. `sendSignInLinkToEmail` → user clicks link in their inbox → `signInWithEmailLink` on `/growth-plan/verify`.
+
+**No email/password.** No magic-link-alternative. No phone auth. No anonymous users.
+
+## Setup
+
+- `src/funnel/services/firebaseClient.ts` initializes the Firebase app once using `NEXT_PUBLIC_FIREBASE_*` env vars.
+- Expose a `useFirebaseUser()` hook that returns `{ user, loading }`.
+- Do NOT initialize Firebase outside the funnel route group — marketing pages don't need it.
+- **Same Firebase project as aurema-app (mobile).** That's the invariant that keeps `firebaseUid` identical across platforms and makes RevenueCat entitlements cross-platform for free.
+
+## Sign-in flow (funnel)
+
+- Early `EmailStep` writes the email to Firestore `funnel_leads` collection for marketing. No Firebase account yet.
+- Before paywall, `SignInStep` presents the three options above.
+- On the email path: funnel shows a "Check your email" screen with a persistent "sent to `x@y.com` — resend" affordance and fallbacks (Google / Apple buttons remain available).
+- When the user clicks the link, they land at `/growth-plan/verify`. That page:
+  1. Reads the email from `localStorage` (stored when the link was sent).
+  2. If missing (different device), prompts for the email.
+  3. Calls `signInWithEmailLink(auth, email, window.location.href)`.
+  4. On success, restores the funnel answer state and routes the user to the paywall (or wherever they left off).
+- After any successful sign-in: store `firebaseUid` + verified `email` in funnel state and call `configureRevenueCat(firebaseUid)`.
+
+## Sign-in flow (mobile app, later)
+
+Same email-link mechanism. User opens `aurema-app`, taps "Sign in with email", enters email, gets a link, the link opens the app via Universal Link / App Link, the app calls `signInWithEmailLink`. Same Firebase project → **same UID** → RevenueCat entitlement is already active.
+
+## ActionCodeSettings
+
+```ts
+const actionCodeSettings: ActionCodeSettings = {
+  url: 'https://aurema-app.com/growth-plan/verify',
+  handleCodeInApp: true,
+  iOS: { bundleId: 'com.aurema.app' },
+  android: { packageName: 'com.aurema.app', installApp: false },
+  linkDomain: 'links.aurema-app.com', // Firebase Hosting custom domain
+}
+```
+
+**Firebase Dynamic Links is dead** (sunset Aug 2025). Use the `linkDomain` parameter with a Firebase Hosting custom domain, OR implement iOS Universal Links / Android App Links pointing at `aurema-app.com/growth-plan/verify` directly. Decide in Phase 4; document the decision in `docs/funnel/05-auth.md`.
+
+## Link — `funnel_leads` email vs Firebase email
+
+If the email used during lead capture matches the one signed in with, everything lines up naturally. If they differ, we **do not merge**. The Firebase-verified email wins on the user doc; the earlier `funnel_leads` row stays untouched for future ESP export.
+
+## Why NOT "create Firebase user via Admin SDK + custom token mid-funnel"
+
+Considered and rejected. Handing a client-side `signInWithCustomToken` for an unverified email enables account-takeover via enumeration: an attacker POSTs a victim's email, receives a custom token, and signs in as the victim. Email-link forces proof of inbox ownership before the Firebase user is created or authenticated, and that's non-negotiable.
+
+## Apple Sign-In on web — non-trivial setup
+
+Requires Apple Developer config (Services ID, return URL, .p8 key). Do **not** render the Apple button until it's live. See `docs/funnel/05-auth.md` for the full checklist.
+
+## Don'ts
+
+- No email/password. We committed to passwordless.
+- No phone auth.
+- No anonymous Firebase users.
+- No `createCustomToken` for client sign-in without a prior verification step.
+- Do not issue our own JWTs. Backend uses `verifyIdToken` on the Firebase ID token.

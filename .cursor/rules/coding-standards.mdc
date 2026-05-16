@@ -1,0 +1,48 @@
+---
+description: Coding standards for the Aurema web repo
+alwaysApply: true
+---
+
+# Coding Standards
+
+## TypeScript
+
+- `strict: true` is assumed. No `any` without an explicit reason commented above it.
+- Use `import type { Foo }` for type-only imports.
+- Prefer `const` objects with `as const` over enums.
+
+## React
+
+- Functional components, named exports.
+- One component per file (except tiny colocated helpers).
+- Hooks live next to the component that owns them, unless reused by ≥2 components → move to `src/funnel/hooks/`.
+
+## Files & folders
+
+- `kebab-case` for directories, `PascalCase.tsx` for component files, `camelCase.ts` for utilities and hooks.
+- No `index.ts` barrel files inside `src/funnel/**` — they hurt tree-shaking and jump-to-definition.
+
+## Imports
+
+- Remove unused imports before finishing. Treat "unused import" as a lint error.
+- Group order: Node/react → third-party → `@/` aliases → relative. A blank line between groups.
+
+## Comments
+
+- Do NOT narrate what the code does (no `// increment counter`).
+- Only comment non-obvious intent, constraints, or trade-offs.
+- Prefer better names over explanatory comments.
+
+## Formatting
+
+- Prettier handles formatting. After any change, run:
+
+```sh
+{ git diff --name-only HEAD; git ls-files --others --exclude-standard; } | xargs npx prettier --write --ignore-unknown
+```
+
+## Don'ts
+
+- No `console.log` in committed code. Use the analytics `track()` wrapper for telemetry or a real logger.
+- No dead code "for later". Delete it; git remembers.
+- No inline styles when a Chakra prop or Tailwind class exists.
