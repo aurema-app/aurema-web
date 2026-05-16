@@ -21,7 +21,12 @@ import {
   googleProvider,
 } from "@/funnel/services/firebaseClient";
 import { actionCodeSettings } from "@/funnel/services/authActionCode";
-import { track } from "@/funnel/analytics/track";
+import { configureRevenueCat } from "@/funnel/services/revenueCatClient";
+import {
+  setAmplitudeUserProperties,
+  setAmplitudeUserId,
+} from "@/funnel/analytics/amplitudeClient";
+import { EVENTS, track } from "@/funnel/analytics/track";
 
 const RESEND_THROTTLE_S = 30;
 const APPLE_ENABLED = process.env.NEXT_PUBLIC_APPLE_SIGNIN_ENABLED === "true";
@@ -70,15 +75,20 @@ export function SignInStep() {
   const handleGoogleSignIn = async () => {
     setError(null);
     setLoading("google");
+    track(EVENTS.SIGN_IN_STARTED, { method: "google" });
     try {
       const cred = await signInWithPopup(auth, googleProvider);
       setAnswer("firebaseUid", cred.user.uid);
       setAnswer("userEmail", cred.user.email ?? email);
-      track("sign_in_success", { stepId: "sign-in", method: "google" });
+      configureRevenueCat(cred.user.uid);
+      setAmplitudeUserId(cred.user.uid);
+      setAmplitudeUserProperties({ signed_in: true, sign_in_method: "google" });
+      track(EVENTS.SIGN_IN_COMPLETED, { method: "google" });
       goNext();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Google sign-in failed.";
       if (!msg.includes("popup-closed") && !msg.includes("cancelled")) {
+        track(EVENTS.SIGN_IN_FAILED, { method: "google", error: msg });
         setError("Google sign-in failed. Please try again.");
       }
     } finally {
@@ -89,15 +99,20 @@ export function SignInStep() {
   const handleAppleSignIn = async () => {
     setError(null);
     setLoading("apple");
+    track(EVENTS.SIGN_IN_STARTED, { method: "apple" });
     try {
       const cred = await signInWithPopup(auth, appleProvider);
       setAnswer("firebaseUid", cred.user.uid);
       setAnswer("userEmail", cred.user.email ?? email);
-      track("sign_in_success", { stepId: "sign-in", method: "apple" });
+      configureRevenueCat(cred.user.uid);
+      setAmplitudeUserId(cred.user.uid);
+      setAmplitudeUserProperties({ signed_in: true, sign_in_method: "apple" });
+      track(EVENTS.SIGN_IN_COMPLETED, { method: "apple" });
       goNext();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Apple sign-in failed.";
       if (!msg.includes("popup-closed") && !msg.includes("cancelled")) {
+        track(EVENTS.SIGN_IN_FAILED, { method: "apple", error: msg });
         setError("Apple sign-in failed. Please try again.");
       }
     } finally {
@@ -108,14 +123,17 @@ export function SignInStep() {
   const sendEmailLink = async (targetEmail: string) => {
     setError(null);
     setLoading("email");
+    track(EVENTS.SIGN_IN_STARTED, { method: "email_link" });
     try {
       await sendSignInLinkToEmail(auth, targetEmail, actionCodeSettings);
       localStorage.setItem("aurema.pendingEmail", targetEmail);
       setSentTo(targetEmail);
       setView("check-email");
       startResendThrottle();
-      track("email_link_sent", { stepId: "sign-in" });
-    } catch {
+      track(EVENTS.EMAIL_LINK_SENT, { step_id: "sign-in" });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Email link failed.";
+      track(EVENTS.SIGN_IN_FAILED, { method: "email_link", error: msg });
       setError(
         "Couldn't send the link. Please check your email and try again.",
       );

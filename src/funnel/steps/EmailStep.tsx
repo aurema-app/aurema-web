@@ -8,7 +8,8 @@ import { ContinueButton } from "@/funnel/components/ContinueButton";
 import { useFunnelAnswers } from "@/funnel/state/useFunnelAnswers";
 import { useFunnelNavigation } from "@/funnel/flow/useFunnelNavigation";
 import { submitLead } from "@/funnel/services/leadsClient";
-import { track } from "@/funnel/analytics/track";
+import { setAmplitudeUserProperties } from "@/funnel/analytics/amplitudeClient";
+import { EVENTS, track } from "@/funnel/analytics/track";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
@@ -30,7 +31,8 @@ export function EmailStep() {
       console.warn("[EmailStep] lead capture failed:", err);
     });
 
-    track("email_submitted", { stepId: "email" });
+    setAmplitudeUserProperties({ email_captured: true });
+    track(EVENTS.EMAIL_CAPTURED, { step_id: "email" });
     goNext();
   };
 

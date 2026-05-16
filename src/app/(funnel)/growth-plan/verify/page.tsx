@@ -14,6 +14,7 @@ import {
 import { isSignInWithEmailLink, signInWithEmailLink } from "firebase/auth";
 
 import { auth } from "@/funnel/services/firebaseClient";
+import { configureRevenueCat } from "@/funnel/services/revenueCatClient";
 import { useFunnelContext } from "@/funnel/state/FunnelContext";
 
 type PageState =
@@ -36,6 +37,7 @@ export default function VerifyPage() {
       localStorage.removeItem("aurema.pendingEmail");
       setAnswer("firebaseUid", cred.user.uid);
       setAnswer("userEmail", cred.user.email ?? email);
+      configureRevenueCat(cred.user.uid);
       router.push("/growth-plan/paywall");
     } catch (err: unknown) {
       localStorage.removeItem("aurema.pendingEmail");

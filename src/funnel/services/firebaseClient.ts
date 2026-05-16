@@ -1,11 +1,14 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider, OAuthProvider } from "firebase/auth";
 
+// Fallback to placeholder strings so Firebase initialises without throwing
+// when env vars are absent (dev without .env.local). Actual auth calls will
+// still fail with a clear error; only sign-in UI is affected.
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY ?? "not-configured",
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN ?? "not-configured",
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ?? "not-configured",
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID ?? "not-configured",
 };
 
 // Idempotent: Next.js hot-reload re-runs module code; avoid duplicate app init.

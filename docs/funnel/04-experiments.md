@@ -16,17 +16,17 @@ Minimal, client-side, Amplitude Experiment flags only.
 ```ts
 export const EXPERIMENTS = {
   INTRO_HERO: {
-    key: 'funnel-intro-hero',
-    variants: ['control', 'variant-a'] as const,
-    defaultVariant: 'control',
+    key: "funnel-intro-hero",
+    variants: ["control", "variant-a"] as const,
+    defaultVariant: "control",
   },
-} as const
+} as const;
 ```
 
 ## Hook
 
 ```ts
-const variant = useVariant(EXPERIMENTS.INTRO_HERO)
+const variant = useVariant(EXPERIMENTS.INTRO_HERO);
 ```
 
 - Returns the current variant, defaulting to `defaultVariant` before the Amplitude client initializes.
@@ -39,9 +39,9 @@ See `.cursor/skills/new-experiment/SKILL.md`.
 
 ## Active experiments
 
-| Key | Status | Started | Ended | Hypothesis | Result | Owner |
-|-----|--------|---------|-------|------------|--------|-------|
-| _none yet — first experiment lands in phase 7_ |
+| Key                 | Status     | Started    | Ended | Hypothesis                                                                                                                                      | Result | Owner |
+| ------------------- | ---------- | ---------- | ----- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ------ | ----- |
+| `funnel-intro-hero` | **Active** | 2026-05-16 | —     | Variant-A outcome-focused copy ("Build the mind you want.") drives higher intro→goal conversion than control ("Where thoughts become clarity.") | —      | —     |
 
 ## Archived experiments
 

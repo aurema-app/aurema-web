@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Box, Heading, Text, VStack } from "@chakra-ui/react";
 
 import { FunnelHeader } from "@/funnel/components/FunnelHeader";
 import { ProgressBar } from "@/funnel/components/ProgressBar";
 import { useFunnelNavigation } from "@/funnel/flow/useFunnelNavigation";
-import { track } from "@/funnel/analytics/track";
+import { EVENTS, track } from "@/funnel/analytics/track";
 
 type StepShellProps = {
   title: string;
@@ -23,12 +23,35 @@ export function StepShell({
   footer,
   hideProgress = false,
 }: StepShellProps) {
-  const { currentStep } = useFunnelNavigation();
+  const { currentStep, currentIndex, totalVisible } = useFunnelNavigation();
+  const mountTimeRef = useRef<number>(0);
 
   useEffect(() => {
-    if (currentStep?.id) {
-      track("step_view", { stepId: currentStep.id });
-    }
+    if (!currentStep?.id) return;
+
+    mountTimeRef.current = Date.now();
+
+    track(EVENTS.STEP_VIEW, {
+      step_id: currentStep.id,
+      // 1-based so dashboard queries read naturally.
+      step_index: currentIndex + 1,
+      total_steps: totalVisible,
+      funnel_progress_pct: Math.round(
+        ((currentIndex + 1) / totalVisible) * 100,
+      ),
+    });
+
+    return () => {
+      const timeSpentMs = Date.now() - mountTimeRef.current;
+      track(EVENTS.STEP_EXIT, {
+        step_id: currentStep.id,
+        time_spent_ms: timeSpentMs,
+        // Integer seconds — easier to read in dashboard tables.
+        time_spent_s: Math.round(timeSpentMs / 1000),
+      });
+    };
+    // Re-run only when the step changes, not on every re-render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentStep?.id]);
 
   return (

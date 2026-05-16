@@ -29,32 +29,34 @@ If this ever breaks, cross-platform entitlements silently stop working. The webh
 
 ## Client code
 
-```ts
-import { Purchases } from '@revenuecat/purchases-js'
+See `src/funnel/services/revenueCatClient.ts` (created in Phase 5).
 
-export const configureRevenueCat = (firebaseUid: string) => {
-  Purchases.configure(process.env.NEXT_PUBLIC_RC_WEB_PUBLIC_KEY!, firebaseUid)
-}
+```ts
+import {
+  configureRevenueCat,
+  getRevenueCat,
+} from "@/funnel/services/revenueCatClient";
 ```
 
-Call once right after Firebase sign-in completes. Never call per-page.
+`configureRevenueCat(firebaseUid)` calls `Purchases.configure(NEXT_PUBLIC_RC_WEB_PUBLIC_KEY, firebaseUid)` and guards missing env vars with a warning. Call exactly once, right after Firebase sign-in completes. Never per-page. **Wired in Phase 6.**
 
 ## Paywall flow
 
 ```ts
-const purchases = Purchases.getSharedInstance()
-const offerings = await purchases.getOfferings()
-const pkg = offerings.current?.monthly ?? offerings.current?.availablePackages[0]
-if (!pkg) throw new Error('No offering configured')
+const purchases = Purchases.getSharedInstance();
+const offerings = await purchases.getOfferings();
+const pkg =
+  offerings.current?.monthly ?? offerings.current?.availablePackages[0];
+if (!pkg) throw new Error("No offering configured");
 
 const result = await purchases.purchase({
   rcPackage: pkg,
   htmlTarget: containerRef.current,
   customerEmail: answers.userEmail,
-  metadata: { source: 'growth-plan', variant: currentVariant },
-})
+  metadata: { source: "growth-plan", variant: currentVariant },
+});
 
-router.push('/growth-plan/activate')
+router.push("/growth-plan/activate");
 ```
 
 ## Activate page
@@ -62,18 +64,18 @@ router.push('/growth-plan/activate')
 Race condition: the webhook may not have hit Firestore before the user lands here.
 
 ```ts
-const maxMs = 10_000
-const start = Date.now()
+const maxMs = 10_000;
+const start = Date.now();
 while (Date.now() - start < maxMs) {
-  const user = await fetch('/api/user').then(r => r.json())
-  if (user.subscriptionStatus === 'active') return renderSuccess()
-  await sleep(500)
+  const user = await fetch("/api/user").then((r) => r.json());
+  if (user.subscriptionStatus === "active") return renderSuccess();
+  await sleep(500);
 }
 
-const info = await purchases.getCustomerInfo()
-if (info.entitlements.active['pro']) return renderSuccess()
+const info = await purchases.getCustomerInfo();
+if (info.entitlements.active["pro"]) return renderSuccess();
 
-renderPendingState()
+renderPendingState();
 ```
 
 ## Backend additions

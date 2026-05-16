@@ -1,19 +1,22 @@
 "use client";
 
-import { Text } from "@chakra-ui/react";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Spinner, VStack } from "@chakra-ui/react";
 
-import { StepShell } from "@/funnel/components/StepShell";
-
+// The paywall is now a dedicated page at /growth-plan/paywall (Phase 6).
+// This step component exists only to satisfy the flow.ts registry and redirect
+// any client navigating via goNext() from the sign-in step.
 export function PaywallStep() {
+  const router = useRouter();
+
+  useEffect(() => {
+    router.replace("/growth-plan/paywall");
+  }, [router]);
+
   return (
-    <StepShell
-      title="Coming soon"
-      subtitle="Your paywall will land in Phase 6."
-      hideProgress
-    >
-      <Text fontFamily="body" fontSize="sm" color="fg.muted">
-        RevenueCat Web Billing checkout will appear here.
-      </Text>
-    </StepShell>
+    <VStack minH="100vh" align="center" justify="center">
+      <Spinner size="lg" color="brand.primary" />
+    </VStack>
   );
 }

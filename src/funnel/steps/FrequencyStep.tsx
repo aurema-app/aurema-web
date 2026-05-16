@@ -4,7 +4,8 @@ import { StepShell } from "@/funnel/components/StepShell";
 import { OptionText } from "@/funnel/components/OptionText";
 import { useFunnelAnswers } from "@/funnel/state/useFunnelAnswers";
 import { useFunnelNavigation } from "@/funnel/flow/useFunnelNavigation";
-import { track } from "@/funnel/analytics/track";
+import { setAmplitudeUserProperties } from "@/funnel/analytics/amplitudeClient";
+import { EVENTS, track } from "@/funnel/analytics/track";
 
 const OPTIONS = [
   { value: "daily", emoji: "🔥", label: "Every day — I'm committed" },
@@ -20,7 +21,8 @@ export function FrequencyStep() {
 
   const onPick = (value: FrequencyValue) => {
     setAnswer("frequency", value);
-    track("answer_selected", { stepId: "frequency", value });
+    setAmplitudeUserProperties({ frequency: value });
+    track(EVENTS.ANSWER_SELECTED, { step_id: "frequency", value });
     goNext();
   };
 

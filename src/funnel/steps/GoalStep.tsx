@@ -4,7 +4,8 @@ import { StepShell } from "@/funnel/components/StepShell";
 import { OptionText } from "@/funnel/components/OptionText";
 import { useFunnelAnswers } from "@/funnel/state/useFunnelAnswers";
 import { useFunnelNavigation } from "@/funnel/flow/useFunnelNavigation";
-import { track } from "@/funnel/analytics/track";
+import { setAmplitudeUserProperties } from "@/funnel/analytics/amplitudeClient";
+import { EVENTS, track } from "@/funnel/analytics/track";
 
 const OPTIONS = [
   { value: "clarity", emoji: "🔍", label: "Find more clarity in my thoughts" },
@@ -21,7 +22,8 @@ export function GoalStep() {
 
   const onPick = (value: GoalValue) => {
     setAnswer("goal", value);
-    track("answer_selected", { stepId: "goal", value });
+    setAmplitudeUserProperties({ goal: value });
+    track(EVENTS.ANSWER_SELECTED, { step_id: "goal", value });
     goNext();
   };
 
