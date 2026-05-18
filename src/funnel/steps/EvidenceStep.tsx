@@ -144,7 +144,7 @@ export function EvidenceStep() {
                   transition="all 0.15s"
                   _hover={{
                     borderColor: "brand.primary",
-                    bg: "lexi.pinkLight",
+                    bg: "lexi.primaryLight",
                   }}
                   _active={{ transform: "scale(0.97)" }}
                   onClick={() => handleChip(chip)}
@@ -206,7 +206,7 @@ export function EvidenceStep() {
             text.trim()
               ? {
                   transform: "translateY(-1px)",
-                  boxShadow: "0 8px 24px rgba(255,125,186,0.4)",
+                  boxShadow: "0 8px 24px rgba(236,72,153,0.4)",
                 }
               : {}
           }

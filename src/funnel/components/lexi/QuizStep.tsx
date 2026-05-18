@@ -134,7 +134,7 @@ export function QuizStep({
             _hover={{
               bg: "lexi.pink",
               transform: "translateY(-1px)",
-              boxShadow: "0 8px 24px rgba(255,125,186,0.4)",
+              boxShadow: "0 8px 24px rgba(236,72,153,0.4)",
             }}
             _active={{ transform: "translateY(0)" }}
             transition="all 0.2s"

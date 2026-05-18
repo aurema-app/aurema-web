@@ -334,7 +334,7 @@ export default function PaywallPage() {
                   w="20px"
                   h="20px"
                   borderRadius="full"
-                  bg="lexi.pinkLight"
+                  bg="lexi.primaryLight"
                   border="1.5px solid"
                   borderColor="brand.primary"
                   display="flex"
@@ -381,14 +381,14 @@ export default function PaywallPage() {
                   borderRadius="2xl"
                   border="2px solid"
                   borderColor={isSelected ? "brand.primary" : "border.light"}
-                  bg={isSelected ? "lexi.pinkLight" : "card.bg"}
+                  bg={isSelected ? "lexi.primaryLight" : "card.bg"}
                   px={5}
                   py={4}
                   cursor="pointer"
                   transition="all 0.18s"
                   position="relative"
                   boxShadow={
-                    isSelected ? "0 4px 20px rgba(255,125,186,0.2)" : "none"
+                    isSelected ? "0 4px 20px rgba(236,72,153,0.2)" : "none"
                   }
                   _hover={{ borderColor: "brand.primary" }}
                 >
@@ -479,7 +479,7 @@ export default function PaywallPage() {
           disabled={!selectedPkg || isPurchasing}
           _hover={{
             transform: "translateY(-2px)",
-            boxShadow: "0 12px 32px rgba(255,125,186,0.45)",
+            boxShadow: "0 12px 32px rgba(236,72,153,0.45)",
           }}
           _active={{ transform: "translateY(0)" }}
           _disabled={{ opacity: 0.5, cursor: "not-allowed" }}

@@ -23,14 +23,14 @@ export function PillButton({
       borderRadius="2xl"
       border="2px solid"
       borderColor={selected ? "brand.primary" : "border.light"}
-      bg={selected ? "lexi.pinkLight" : "card.bg"}
+      bg={selected ? "lexi.primaryLight" : "card.bg"}
       cursor="pointer"
       transition="all 0.18s ease"
       _hover={{
         borderColor: "brand.primary",
-        bg: "lexi.pinkLight",
+        bg: "lexi.primaryLight",
         transform: "translateY(-1px)",
-        boxShadow: "0 4px 16px rgba(255, 125, 186, 0.2)",
+        boxShadow: "0 4px 16px rgba(236, 72, 153, 0.2)",
       }}
       _active={{ transform: "translateY(0)" }}
       onClick={onClick}

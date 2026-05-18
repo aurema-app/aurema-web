@@ -57,7 +57,7 @@ export function TeaserStep() {
             px={4}
             py={2}
             borderRadius="full"
-            bg="lexi.pinkLight"
+            bg="lexi.primaryLight"
             border="1.5px solid"
             borderColor="brand.primary"
           >
@@ -99,7 +99,7 @@ export function TeaserStep() {
                   opacity={0.8 - i * 0.12}
                 />
               ))}
-              <Box h="40px" bg="lexi.pinkLight" borderRadius="xl" mt={4} />
+              <Box h="40px" bg="lexi.primaryLight" borderRadius="xl" mt={4} />
             </Box>
             {/* Mascot overlay */}
             <Box
@@ -205,7 +205,7 @@ export function TeaserStep() {
           fontSize="md"
           _hover={{
             transform: "translateY(-1px)",
-            boxShadow: "0 8px 24px rgba(255,125,186,0.4)",
+            boxShadow: "0 8px 24px rgba(236,72,153,0.4)",
           }}
           _active={{ transform: "translateY(0)" }}
           transition="all 0.2s"

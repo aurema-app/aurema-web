@@ -131,3 +131,15 @@ body {
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.5);
 }
+
+/* Lexi funnel — uniform surface, hide marketing dark pattern */
+body:has(.lexi-funnel-root) {
+  background-color: #f6f2ff !important;
+  color: #1a1a2e;
+  align-items: stretch;
+  justify-content: flex-start;
+}
+
+body:has(.lexi-funnel-root) .background-pattern {
+  display: none;
+}

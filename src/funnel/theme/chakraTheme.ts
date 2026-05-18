@@ -1,37 +1,51 @@
 import { createSystem, defaultConfig, defineConfig } from "@chakra-ui/react";
 
-// Lexi color palette — from character sheet:
-// Pink: #FF7DBA | Lavender: #C7A6F7 | Skin: #FFBB88 | Neutral bg: #F2F2F6
+// ─── Lexi Design Tokens ────────────────────────────────────────────────────
+// Change any value here and every component picks it up automatically.
+//
+//  lexi.primary       #EC4899  — hot pink CTA / accents
+//  lexi.textSecondary #746476  — muted purple-gray body text
+//  lexi.surface       #F6F2FF  — page background / cards
 
 const config = defineConfig({
   theme: {
     tokens: {
       colors: {
         lexi: {
-          pink: { value: "#FF7DBA" },
-          pinkLight: { value: "#FFE8F3" },
+          // ── Core brand ────────────────────────────────────────────────────
+          primary: { value: "#EC4899" },
+          primaryLight: { value: "#FCE7F3" },
+
+          // ── Lavender accent ───────────────────────────────────────────────
           lavender: { value: "#C7A6F7" },
           lavenderLight: { value: "#EDE5FF" },
-          charcoal: { value: "#1A1A2E" },
-          muted: { value: "#7C7C9A" },
-          bg: { value: "#FAFAFF" },
+
+          // ── Backgrounds ───────────────────────────────────────────────────
+          surface: { value: "#F6F2FF" },
           card: { value: "#FFFFFF" },
-          border: { value: "#EAEAF4" },
+
+          // ── Text ─────────────────────────────────────────────────────────
+          charcoal: { value: "#1A1A2E" },
+          textSecondary: { value: "#746476" },
+
+          // ── Misc ─────────────────────────────────────────────────────────
+          border: { value: "#EAE6F4" },
           skin: { value: "#FFBB88" },
         },
       },
       fonts: {
-        // Quicksand — friendly, rounded, Gen Z energy
-        body: { value: "var(--font-quicksand), system-ui, sans-serif" },
-        heading: { value: "var(--font-quicksand), system-ui, sans-serif" },
+        // Poppins covers every weight from 400 (body) to 900 (display headlines)
+        body: { value: "var(--font-poppins), system-ui, sans-serif" },
+        heading: { value: "var(--font-poppins), system-ui, sans-serif" },
+        display: { value: "var(--font-poppins), system-ui, sans-serif" },
       },
     },
     semanticTokens: {
       colors: {
-        "bg.canvas": { value: "{colors.lexi.bg}" },
+        "bg.canvas": { value: "{colors.lexi.surface}" },
         "fg.default": { value: "{colors.lexi.charcoal}" },
-        "fg.muted": { value: "{colors.lexi.muted}" },
-        "brand.primary": { value: "{colors.lexi.pink}" },
+        "fg.muted": { value: "{colors.lexi.textSecondary}" },
+        "brand.primary": { value: "{colors.lexi.primary}" },
         "brand.secondary": { value: "{colors.lexi.lavender}" },
         "card.bg": { value: "{colors.lexi.card}" },
         "border.light": { value: "{colors.lexi.border}" },
