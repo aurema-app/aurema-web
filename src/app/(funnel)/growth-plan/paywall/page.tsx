@@ -2,30 +2,35 @@
 
 import { useEffect, useRef, useState } from "react";
 
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 import { Box, Button, Spinner, Text, VStack } from "@chakra-ui/react";
 import { motion } from "framer-motion";
-import type {
-  Offerings,
-  Package,
-  PurchasesError,
-} from "@revenuecat/purchases-js";
+import type { Package, PurchasesError } from "@revenuecat/purchases-js";
 import { PackageType } from "@revenuecat/purchases-js";
 
 import { GrowthPlanPolicy } from "@/funnel/components/GrowthPlanPolicy";
 import { LexiAvatar } from "@/funnel/components/lexi/LexiAvatar";
 import {
+  DUMMY_PAYWALL_PLANS,
+  DUMMY_PURCHASE_KEY,
+  type PaywallPlan,
+} from "@/funnel/paywall/dummyPackages";
+import {
   configureRevenueCat,
   getRevenueCat,
+  isRevenueCatEnabled,
 } from "@/funnel/services/revenueCatClient";
 import { setAmplitudeUserProperties } from "@/funnel/analytics/amplitudeClient";
 import { useFunnelContext } from "@/funnel/state/FunnelContext";
 import { EVENTS, track } from "@/funnel/analytics/track";
 
+const SURFACE = "#F6F2FF";
+
 type PageState =
   | { kind: "loading" }
-  | { kind: "ready"; offerings: Offerings }
+  | { kind: "ready"; plans: PaywallPlan[]; mode: "dummy" | "live" }
   | { kind: "no-offerings" }
   | { kind: "error"; message: string };
 
@@ -42,61 +47,71 @@ const TRUST_BADGES = [
   "Cancel Anytime",
 ] as const;
 
-function packageLabel(pkg: Package): string {
-  switch (pkg.packageType) {
-    case PackageType.Annual:
-      return "Annual";
-    case PackageType.Monthly:
-      return "Monthly";
-    default:
-      return pkg.webBillingProduct.title;
-  }
+function useDummyPaywall(firebaseUid: string | undefined): boolean {
+  if (!isRevenueCatEnabled()) return true;
+  return Boolean(firebaseUid?.startsWith("email:"));
 }
 
-function packageNote(pkg: Package): string {
-  switch (pkg.packageType) {
-    case PackageType.Annual:
-      return "Best value · per year";
-    case PackageType.Monthly:
-      return "Cancel anytime · per month";
-    default:
-      return "";
-  }
+function packageToPlan(pkg: Package, index: number): PaywallPlan {
+  const label =
+    pkg.packageType === PackageType.Annual
+      ? "Annual"
+      : pkg.packageType === PackageType.Monthly
+        ? "Monthly"
+        : pkg.webBillingProduct.title;
+
+  const note =
+    pkg.packageType === PackageType.Annual
+      ? "Best value · per year"
+      : pkg.packageType === PackageType.Monthly
+        ? "Cancel anytime · per month"
+        : "";
+
+  return {
+    id: pkg.identifier,
+    label,
+    note,
+    price: pkg.webBillingProduct.currentPrice.formattedPrice,
+    isMostPopular: index === 0,
+  };
 }
 
 function PageShell({ children }: { children: React.ReactNode }) {
   return (
     <Box
       minH="100dvh"
-      bg="bg.canvas"
+      w="full"
+      bg={SURFACE}
       display="flex"
       flexDirection="column"
       alignItems="center"
     >
       <Box
         w="full"
-        maxW="420px"
+        maxW="430px"
         flex="1"
         display="flex"
         flexDirection="column"
         px={5}
-        pt={8}
-        pb={10}
+        pt="max(24px, env(safe-area-inset-top))"
+        pb="max(20px, env(safe-area-inset-bottom))"
       >
-        {/* Wordmark */}
-        <Text
-          fontFamily="heading"
-          fontSize="2xl"
-          fontWeight="800"
-          color="fg.default"
-          textAlign="center"
+        <Box
+          mx="auto"
+          position="relative"
+          h="36px"
+          w="88px"
           mb={6}
+          flexShrink={0}
         >
-          Lexi
-          <Text as="span" color="brand.primary" fontSize="xl" ml="1px">
-            ♥
-          </Text>
-        </Text>
+          <Image
+            src="/lexi/logo.png"
+            alt="Lexi"
+            fill
+            style={{ objectFit: "contain" }}
+            priority
+          />
+        </Box>
         {children}
       </Box>
     </Box>
@@ -109,18 +124,33 @@ export default function PaywallPage() {
   const checkoutRef = useRef<HTMLDivElement>(null);
 
   const [state, setState] = useState<PageState>({ kind: "loading" });
-  const [selectedPkg, setSelectedPkg] = useState<Package | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [livePackages, setLivePackages] = useState<Package[]>([]);
   const [purchaseError, setPurchaseError] = useState<string | null>(null);
   const [isPurchasing, setIsPurchasing] = useState(false);
 
+  const dummyMode = useDummyPaywall(answers.firebaseUid);
+
   useEffect(() => {
     if (!answers.firebaseUid) {
-      router.replace("/growth-plan/sign-in");
+      router.replace("/growth-plan/email");
+      return;
+    }
+
+    if (dummyMode) {
+      const defaultPlan =
+        DUMMY_PAYWALL_PLANS.find((p) => p.isMostPopular) ??
+        DUMMY_PAYWALL_PLANS[0];
+      setSelectedId(defaultPlan.id);
+      setState({ kind: "ready", plans: DUMMY_PAYWALL_PLANS, mode: "dummy" });
+      track(EVENTS.PAYWALL_VIEWED, {
+        mode: "dummy",
+        packages: DUMMY_PAYWALL_PLANS.map((p) => p.id),
+      });
       return;
     }
 
     configureRevenueCat(answers.firebaseUid);
-
     let cancelled = false;
 
     const load = async () => {
@@ -137,18 +167,18 @@ export default function PaywallPage() {
           return;
         }
 
+        const pkgs = offerings.current.availablePackages;
+        const plans = pkgs.map(packageToPlan);
         const defaultPkg =
-          offerings.current.annual ??
-          offerings.current.monthly ??
-          offerings.current.availablePackages[0];
+          offerings.current.annual ?? offerings.current.monthly ?? pkgs[0];
 
-        setSelectedPkg(defaultPkg);
-        setState({ kind: "ready", offerings });
+        setLivePackages(pkgs);
+        setSelectedId(defaultPkg.identifier);
+        setState({ kind: "ready", plans, mode: "live" });
 
         track(EVENTS.PAYWALL_VIEWED, {
-          packages: offerings.current.availablePackages.map(
-            (p) => p.identifier,
-          ),
+          mode: "live",
+          packages: pkgs.map((p) => p.identifier),
           default_package: defaultPkg.identifier,
         });
       } catch (err: unknown) {
@@ -164,10 +194,27 @@ export default function PaywallPage() {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [answers.firebaseUid]);
+  }, [answers.firebaseUid, dummyMode]);
 
-  const handlePurchase = async () => {
+  const handleDummyPurchase = () => {
+    const plan =
+      state.kind === "ready"
+        ? state.plans.find((p) => p.id === selectedId)
+        : null;
+    track(EVENTS.PURCHASE_COMPLETED, {
+      mode: "dummy",
+      package_id: selectedId,
+      price_formatted: plan?.price,
+    });
+    setAmplitudeUserProperties({ plan_type: selectedId, subscribed: true });
+    sessionStorage.setItem(DUMMY_PURCHASE_KEY, "1");
+    router.push("/growth-plan/activate");
+  };
+
+  const handleLivePurchase = async () => {
+    const selectedPkg = livePackages.find((p) => p.identifier === selectedId);
     if (!selectedPkg) return;
+
     setPurchaseError(null);
     setIsPurchasing(true);
 
@@ -201,15 +248,20 @@ export default function PaywallPage() {
     } catch (err: unknown) {
       const rcErr = err as PurchasesError;
       if (rcErr?.errorCode === 1) {
-        // User cancelled — restore offerings without surfacing an error.
         setIsPurchasing(false);
         const rc = getRevenueCat();
         const restored = await rc.getOfferings().catch(() => null);
-        setState(
-          restored
-            ? { kind: "ready", offerings: restored }
-            : { kind: "no-offerings" },
-        );
+        if (restored?.current?.availablePackages.length) {
+          const pkgs = restored.current.availablePackages;
+          setLivePackages(pkgs);
+          setState({
+            kind: "ready",
+            plans: pkgs.map(packageToPlan),
+            mode: "live",
+          });
+        } else {
+          setState({ kind: "no-offerings" });
+        }
         return;
       }
 
@@ -226,12 +278,27 @@ export default function PaywallPage() {
 
       const rc = getRevenueCat();
       const restored = await rc.getOfferings().catch(() => null);
-      setState(
-        restored
-          ? { kind: "ready", offerings: restored }
-          : { kind: "no-offerings" },
-      );
+      if (restored?.current?.availablePackages.length) {
+        const pkgs = restored.current.availablePackages;
+        setLivePackages(pkgs);
+        setState({
+          kind: "ready",
+          plans: pkgs.map(packageToPlan),
+          mode: "live",
+        });
+      } else {
+        setState({ kind: "no-offerings" });
+      }
     }
+  };
+
+  const handlePurchase = () => {
+    if (state.kind !== "ready") return;
+    if (state.mode === "dummy") {
+      handleDummyPurchase();
+      return;
+    }
+    void handleLivePurchase();
   };
 
   if (state.kind === "loading") {
@@ -283,13 +350,27 @@ export default function PaywallPage() {
     );
   }
 
-  if (state.kind !== "ready") return null;
-  const packages: Package[] = state.offerings.current?.availablePackages ?? [];
+  const { plans, mode } = state;
 
   return (
     <PageShell>
       <VStack gap={6} align="stretch" flex="1">
-        {/* Mascot */}
+        {mode === "dummy" && (
+          <Text
+            fontSize="11px"
+            fontWeight="600"
+            color="fg.muted"
+            textAlign="center"
+            bg="lexi.cardFeedback"
+            borderRadius="full"
+            px={3}
+            py={1}
+            alignSelf="center"
+          >
+            Preview mode — no charge
+          </Text>
+        )}
+
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -299,7 +380,6 @@ export default function PaywallPage() {
           <LexiAvatar mood="soft" size="md" />
         </motion.div>
 
-        {/* Hook */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -321,7 +401,6 @@ export default function PaywallPage() {
           </Text>
         </motion.div>
 
-        {/* Value props */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -360,28 +439,26 @@ export default function PaywallPage() {
           </VStack>
         </motion.div>
 
-        {/* Pricing cards */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.3 }}
         >
           <VStack gap={3} align="stretch">
-            {packages.map((pkg, i) => {
-              const isSelected = selectedPkg?.identifier === pkg.identifier;
-              const isMostPopular = i === 0;
+            {plans.map((plan) => {
+              const isSelected = selectedId === plan.id;
 
               return (
                 <Box
-                  key={pkg.identifier}
+                  key={plan.id}
                   as="button"
-                  onClick={() => setSelectedPkg(pkg)}
+                  onClick={() => setSelectedId(plan.id)}
                   w="full"
                   textAlign="left"
                   borderRadius="2xl"
                   border="2px solid"
-                  borderColor={isSelected ? "brand.primary" : "border.light"}
-                  bg={isSelected ? "lexi.primaryLight" : "card.bg"}
+                  borderColor={isSelected ? "brand.primary" : "#E4DBFE"}
+                  bg={isSelected ? "lexi.primaryLight" : "white"}
                   px={5}
                   py={4}
                   cursor="pointer"
@@ -392,7 +469,7 @@ export default function PaywallPage() {
                   }
                   _hover={{ borderColor: "brand.primary" }}
                 >
-                  {isMostPopular && (
+                  {plan.isMostPopular && (
                     <Box
                       position="absolute"
                       top="-10px"
@@ -426,7 +503,7 @@ export default function PaywallPage() {
                         fontWeight="800"
                         color="fg.default"
                       >
-                        {packageLabel(pkg)}
+                        {plan.label}
                       </Text>
                       <Text
                         fontSize="xs"
@@ -434,7 +511,7 @@ export default function PaywallPage() {
                         fontWeight="500"
                         mt={0.5}
                       >
-                        {packageNote(pkg)}
+                        {plan.note}
                       </Text>
                     </Box>
                     <Text
@@ -443,7 +520,7 @@ export default function PaywallPage() {
                       fontWeight="900"
                       color={isSelected ? "brand.primary" : "fg.default"}
                     >
-                      {pkg.webBillingProduct.currentPrice.formattedPrice}
+                      {plan.price}
                     </Text>
                   </Box>
                 </Box>
@@ -452,13 +529,12 @@ export default function PaywallPage() {
           </VStack>
         </motion.div>
 
-        {/* RC checkout mount point */}
-        <Box ref={checkoutRef} w="full" />
+        {mode === "live" && <Box ref={checkoutRef} w="full" />}
 
         {purchaseError && (
           <Text
             fontSize="sm"
-            color="red.400"
+            color="red.500"
             textAlign="center"
             fontWeight="600"
           >
@@ -466,20 +542,21 @@ export default function PaywallPage() {
           </Text>
         )}
 
-        {/* CTA */}
         <Button
           bg="brand.primary"
           color="white"
           borderRadius="full"
-          py={7}
+          h="56px"
           w="full"
-          fontFamily="body"
+          fontFamily="display"
           fontWeight="700"
-          fontSize="lg"
-          disabled={!selectedPkg || isPurchasing}
+          fontSize="17px"
+          disabled={!selectedId || isPurchasing}
           _hover={{
-            transform: "translateY(-2px)",
-            boxShadow: "0 12px 32px rgba(236,72,153,0.45)",
+            transform: selectedId ? "translateY(-2px)" : undefined,
+            boxShadow: selectedId
+              ? "0 12px 32px rgba(236,72,153,0.45)"
+              : undefined,
           }}
           _active={{ transform: "translateY(0)" }}
           _disabled={{ opacity: 0.5, cursor: "not-allowed" }}
@@ -491,12 +568,13 @@ export default function PaywallPage() {
               <Spinner size="sm" />
               <Text>Processing…</Text>
             </Box>
+          ) : mode === "dummy" ? (
+            "Continue (preview)"
           ) : (
             "Get Instant Clarity"
           )}
         </Button>
 
-        {/* Trust badges */}
         <Box display="flex" justifyContent="center" gap={4} flexWrap="wrap">
           {TRUST_BADGES.map((badge) => (
             <Text

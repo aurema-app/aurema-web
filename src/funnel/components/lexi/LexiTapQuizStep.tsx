@@ -5,15 +5,15 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-import { Box, Button, Text, VStack } from "@chakra-ui/react";
+import { Box, Text, VStack } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 
-import { LexiSaysCard } from "@/funnel/components/lexi/LexiSaysCard";
 import { QuizOptionButton } from "@/funnel/components/lexi/QuizOptionButton";
 import { setAmplitudeUserProperties } from "@/funnel/analytics/amplitudeClient";
 import { EVENTS, track } from "@/funnel/analytics/track";
 import { useFunnelNavigation } from "@/funnel/flow/useFunnelNavigation";
 import { useFunnelAnswers } from "@/funnel/state/useFunnelAnswers";
+import type { FunnelAnswers } from "@/funnel/state/types";
 
 const SURFACE = "#F6F2FF";
 
@@ -23,49 +23,40 @@ const fadeUp = (delay = 0) => ({
   transition: { duration: 0.38, delay, ease: "easeOut" as const },
 });
 
-const OPTIONS = [
-  {
-    id: "yes",
-    emoji: "👍",
-    label: "Yes, I just think I did something wrong",
-    feedback:
-      "Your intuition isn't broken, babe. Your nervous system is just tired of guessing.",
-  },
-  {
-    id: "notice",
-    emoji: "👌",
-    label: "I notice it, but I stay calm",
-    feedback:
-      "Staying calm is good. Just make sure it's actually calm and not just practiced ignoring.",
-  },
-  {
-    id: "no",
-    emoji: "🤘",
-    label: "I don't pay attention to that",
-    feedback:
-      "That's either really healthy or really trained. Worth knowing which one it is.",
-  },
-] as const;
+export type TapQuizOption = {
+  id: string;
+  emoji: string;
+  label: string;
+};
 
-export function DigitalAnxietyStep() {
+type LexiTapQuizStepProps = {
+  question: string;
+  options: readonly TapQuizOption[];
+  answerKey: keyof FunnelAnswers;
+  stepId: string;
+  amplitudeProperty: string;
+};
+
+export function LexiTapQuizStep({
+  question,
+  options,
+  answerKey,
+  stepId,
+  amplitudeProperty,
+}: LexiTapQuizStepProps) {
   const [selected, setSelected] = useState<string | null>(null);
   const { setAnswer } = useFunnelAnswers();
   const { goNext } = useFunnelNavigation();
-
-  const selectedOption = OPTIONS.find((o) => o.id === selected);
 
   const handleSelect = (id: string) => {
     if (selected) return;
 
     setSelected(id);
-    setAnswer("digitalAnxiety", id);
-    track(EVENTS.ANSWER_SELECTED, { step: "digital_anxiety", value: id });
-    setAmplitudeUserProperties({ digital_anxiety: id });
-  };
+    setAnswer(answerKey, id);
+    track(EVENTS.ANSWER_SELECTED, { step: stepId, value: id });
+    setAmplitudeUserProperties({ [amplitudeProperty]: id });
 
-  const handleContinue = () => {
-    track(EVENTS.STEP_EXIT, { step: "digital-anxiety" });
-    goNext();
+    window.setTimeout(() => goNext(), 280);
   };
 
   return (
@@ -116,8 +107,7 @@ export function DigitalAnxietyStep() {
               color="fg.default"
               textAlign="center"
             >
-              Does an unexpected shift in their texting tone make your stomach
-              drop?
+              {question}
             </Text>
           </motion.div>
         </VStack>
@@ -125,63 +115,31 @@ export function DigitalAnxietyStep() {
         <Box
           flex="1"
           w="full"
-          overflowY="auto"
-          overflowX="hidden"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          py={4}
           minH={0}
+          overflowY="auto"
           css={{
             WebkitOverflowScrolling: "touch",
             scrollbarWidth: "none",
             "&::-webkit-scrollbar": { display: "none" },
           }}
         >
-          <Box
-            minH="full"
-            display="flex"
-            flexDirection="column"
-            alignItems="center"
-            justifyContent="center"
-            py={4}
-          >
-            <motion.div {...fadeUp(0.14)} style={{ width: "100%" }}>
-              <VStack gap={2.5} w="full" align="stretch">
-                {OPTIONS.map((opt) => (
-                  <QuizOptionButton
-                    key={opt.id}
-                    emoji={opt.emoji}
-                    label={opt.label}
-                    selected={selected === opt.id}
-                    onClick={() => handleSelect(opt.id)}
-                  />
-                ))}
-              </VStack>
-
-              {selectedOption && (
-                <>
-                  <LexiSaysCard text={selectedOption.feedback} />
-                  <Button
-                    bg="brand.primary"
-                    color="white"
-                    borderRadius="full"
-                    h="56px"
-                    w="full"
-                    fontFamily="display"
-                    fontWeight="700"
-                    fontSize="17px"
-                    mt={4}
-                    _hover={{
-                      transform: "translateY(-2px)",
-                      boxShadow: "0 12px 32px rgba(236,72,153,0.38)",
-                    }}
-                    _active={{ transform: "translateY(0)" }}
-                    transition="all 0.18s ease"
-                    onClick={handleContinue}
-                  >
-                    Continue Analysis
-                  </Button>
-                </>
-              )}
-            </motion.div>
-          </Box>
+          <motion.div {...fadeUp(0.16)} style={{ width: "100%" }}>
+            <VStack gap={2.5} w="full" align="stretch">
+              {options.map((opt) => (
+                <QuizOptionButton
+                  key={opt.id}
+                  emoji={opt.emoji}
+                  label={opt.label}
+                  selected={selected === opt.id}
+                  onClick={() => handleSelect(opt.id)}
+                />
+              ))}
+            </VStack>
+          </motion.div>
         </Box>
 
         <Text
@@ -190,7 +148,6 @@ export function DigitalAnxietyStep() {
           color="fg.muted"
           textAlign="center"
           flexShrink={0}
-          mt={2}
         >
           <Link href="/terms" style={{ textDecoration: "underline" }}>
             Terms of use

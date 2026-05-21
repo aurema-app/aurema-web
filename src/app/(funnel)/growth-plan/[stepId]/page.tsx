@@ -8,6 +8,9 @@ import { flow } from "@/funnel/flow/flow";
 
 // Lexi funnel steps
 import { LandingStep } from "@/funnel/steps/LandingStep";
+import { DecodingTargetStep } from "@/funnel/steps/DecodingTargetStep";
+import { DemographicsStep } from "@/funnel/steps/DemographicsStep";
+import { TimelineStep } from "@/funnel/steps/TimelineStep";
 import { SocialProofStep } from "@/funnel/steps/SocialProofStep";
 import { PeaceBreakerStep } from "@/funnel/steps/PeaceBreakerStep";
 import { OverthinkingStep } from "@/funnel/steps/OverthinkingStep";
@@ -28,6 +31,9 @@ import { PaywallStep } from "@/funnel/steps/PaywallStep";
 const STEP_COMPONENTS: Record<string, ComponentType> = {
   // Lexi screens 1–12
   landing: LandingStep,
+  "decoding-target": DecodingTargetStep,
+  demographics: DemographicsStep,
+  timeline: TimelineStep,
   "social-proof": SocialProofStep,
   "peace-breaker": PeaceBreakerStep,
   overthinking: OverthinkingStep,

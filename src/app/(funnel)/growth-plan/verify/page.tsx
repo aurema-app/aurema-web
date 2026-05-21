@@ -163,7 +163,7 @@ export default function VerifyPage() {
             size="lg"
             borderRadius="xl"
             _hover={{ opacity: 0.9 }}
-            onClick={() => router.push("/growth-plan/sign-in")}
+            onClick={() => router.push("/growth-plan/email")}
           >
             Try again
           </Button>

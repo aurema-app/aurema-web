@@ -49,143 +49,178 @@ export function SocialProofStep() {
 
   return (
     <Box
-      minH="100dvh"
+      h="100dvh"
+      maxH="100dvh"
       w="full"
       bg={SURFACE}
       display="flex"
       flexDirection="column"
       alignItems="center"
+      overflow="hidden"
     >
       <Box
         w="full"
         maxW="430px"
-        flex="1"
+        h="full"
         display="flex"
         flexDirection="column"
         bg={SURFACE}
-        px={5}
-        pt={8}
-        pb={6}
+        pt="max(24px, env(safe-area-inset-top))"
       >
-        <VStack gap={5} w="full" align="center" flex="1">
-          {/* Logo */}
-          <motion.div {...fadeUp(0)}>
-            <Box position="relative" h="40px" w="96px">
-              <Image
-                src="/lexi/logo.png"
-                alt="Lexi"
-                fill
-                style={{ objectFit: "contain" }}
-                priority
-              />
-            </Box>
-          </motion.div>
+        {/* Scrollable content */}
+        <Box
+          flex="1"
+          overflowY="auto"
+          overflowX="hidden"
+          px={4}
+          pb={3}
+          css={{
+            WebkitOverflowScrolling: "touch",
+            scrollbarWidth: "none",
+            "&::-webkit-scrollbar": { display: "none" },
+          }}
+        >
+          <VStack gap={{ base: 3, sm: 4 }} w="full" align="center" pb={2}>
+            <motion.div {...fadeUp(0)}>
+              <Box position="relative" h="36px" w="88px">
+                <Image
+                  src="/lexi/logo.png"
+                  alt="Lexi"
+                  fill
+                  style={{ objectFit: "contain" }}
+                  priority
+                />
+              </Box>
+            </motion.div>
 
-          {/* Headline */}
-          <motion.div {...fadeUp(0.06)} style={{ width: "100%" }}>
-            <Text
-              fontFamily="display"
-              fontSize={{ base: "32px", sm: "36px" }}
-              fontWeight="800"
-              lineHeight="1.15"
-              letterSpacing="-0.5px"
-              color="fg.default"
-              textAlign="center"
-            >
-              You aren&rsquo;t the only one looping
-            </Text>
-          </motion.div>
-
-          {/* Social proof box */}
-          <motion.div {...fadeUp(0.12)} style={{ width: "100%" }}>
-            <Box
-              w="full"
-              border="1.5px solid"
-              borderColor="lexi.lavender"
-              borderRadius="xl"
-              px={5}
-              py={5}
-              textAlign="center"
-            >
-              <Text
-                fontFamily="display"
-                fontSize={{ base: "36px", sm: "40px" }}
-                fontWeight="900"
-                color="brand.primary"
-                lineHeight="1"
-                letterSpacing="-1px"
-              >
-                17k+ women
-              </Text>
+            <motion.div {...fadeUp(0.06)} style={{ width: "100%" }}>
               <Text
                 fontFamily="body"
-                fontSize="sm"
-                fontWeight="600"
+                fontSize="24px"
+                fontWeight="800"
+                lineHeight="1.2"
+                letterSpacing="-0.3px"
                 color="fg.default"
-                mt={2}
+                textAlign="center"
               >
-                already get help from{" "}
-                <Text as="span" fontWeight="800" color="brand.primary">
-                  Lexi
-                </Text>
+                You aren&rsquo;t the
+                <br />
+                only one looping
               </Text>
-            </Box>
-          </motion.div>
+            </motion.div>
 
-          {/* Testimonial cards */}
-          <VStack gap={3} w="full" align="stretch">
-            {TESTIMONIALS.map((card, i) => (
-              <motion.div
-                key={card.handle}
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{
-                  duration: 0.4,
-                  delay: 0.2 + i * 0.1,
-                  ease: "easeOut",
-                }}
+            <motion.div {...fadeUp(0.12)} style={{ width: "100%" }}>
+              <Box
+                w="full"
+                border="1.5px solid"
+                borderColor="lexi.lavender"
+                borderRadius="xl"
+                px={4}
+                py={4}
+                textAlign="center"
               >
-                <TestimonialCard
-                  avatarSrc={card.avatar}
-                  title={card.title}
-                  handle={card.handle}
-                  body={card.body}
-                />
-              </motion.div>
-            ))}
-          </VStack>
-        </VStack>
+                <Text
+                  fontFamily="body"
+                  fontSize="36px"
+                  fontWeight="700"
+                  color="brand.primary"
+                  lineHeight="1.1"
+                  letterSpacing="-0.5px"
+                >
+                  17k+ women
+                </Text>
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                  gap={1}
+                  mt={1.5}
+                  flexWrap="wrap"
+                >
+                  <Text
+                    fontFamily="body"
+                    fontSize="12px"
+                    fontWeight="400"
+                    color="fg.default"
+                  >
+                    already get help from
+                  </Text>
+                  <Box position="relative" h="14px" w="44px" flexShrink={0}>
+                    <Image
+                      src="/lexi/logo.png"
+                      alt="Lexi"
+                      fill
+                      style={{
+                        objectFit: "contain",
+                        objectPosition: "left center",
+                      }}
+                    />
+                  </Box>
+                </Box>
+              </Box>
+            </motion.div>
 
-        {/* CTA + footer */}
-        <Box w="full" mt={6}>
-          <motion.div {...fadeUp(0.5)}>
-            <Button
-              bg="brand.primary"
-              color="white"
-              borderRadius="full"
-              h="64px"
-              w="full"
-              fontFamily="display"
-              fontWeight="700"
-              fontSize="18px"
-              _hover={{
-                transform: "translateY(-2px)",
-                boxShadow: "0 12px 32px rgba(236,72,153,0.38)",
-              }}
-              _active={{ transform: "translateY(0)" }}
-              transition="all 0.18s ease"
-              onClick={handleCta}
-            >
-              See where you stand
-            </Button>
-          </motion.div>
+            <VStack gap={2.5} w="full" align="stretch">
+              {TESTIMONIALS.map((card, i) => (
+                <motion.div
+                  key={card.handle}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{
+                    duration: 0.35,
+                    delay: 0.15 + i * 0.08,
+                    ease: "easeOut",
+                  }}
+                >
+                  <TestimonialCard
+                    avatarSrc={card.avatar}
+                    title={card.title}
+                    handle={card.handle}
+                    body={card.body}
+                  />
+                </motion.div>
+              ))}
+            </VStack>
+          </VStack>
+        </Box>
+
+        {/* Pinned CTA + footer — always visible */}
+        <Box
+          flexShrink={0}
+          w="full"
+          px={4}
+          pt={3}
+          pb="max(16px, env(safe-area-inset-bottom))"
+          bg={SURFACE}
+          borderTop="1px solid"
+          borderColor="lexi.border"
+        >
+          <Button
+            bg="brand.primary"
+            color="white"
+            borderRadius="full"
+            h={{ base: "56px", sm: "60px" }}
+            w="full"
+            fontFamily="display"
+            fontWeight="700"
+            fontSize="17px"
+            _hover={{
+              transform: "translateY(-2px)",
+              boxShadow: "0 12px 32px rgba(236,72,153,0.38)",
+            }}
+            _active={{ transform: "translateY(0)" }}
+            transition="all 0.18s ease"
+            onClick={handleCta}
+          >
+            See where you stand
+          </Button>
 
           <Text
             fontSize="11px"
             fontWeight="500"
             color="fg.muted"
             textAlign="center"
-            mt={4}
+            mt={3}
           >
             <Link href="/terms" style={{ textDecoration: "underline" }}>
               Terms of use

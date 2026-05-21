@@ -31,6 +31,10 @@ const config = defineConfig({
           // ── Misc ─────────────────────────────────────────────────────────
           border: { value: "#EAE6F4" },
           skin: { value: "#FFBB88" },
+
+          // Lexi says feedback card
+          cardFeedback: { value: "#E4DBFE" },
+          cardFeedbackShadow: { value: "#A78BFA" },
         },
       },
       fonts: {
@@ -38,6 +42,10 @@ const config = defineConfig({
         body: { value: "var(--font-poppins), system-ui, sans-serif" },
         heading: { value: "var(--font-poppins), system-ui, sans-serif" },
         display: { value: "var(--font-poppins), system-ui, sans-serif" },
+        // Bumbbled — drop files in public/fonts/ (see globals.css @font-face)
+        script: {
+          value: "'Bumbbled', var(--font-lexi-script), cursive",
+        },
       },
     },
     semanticTokens: {

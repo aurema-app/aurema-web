@@ -2,7 +2,12 @@
 export const ANSWERS_STORAGE_KEY = "lexi.funnel.answers.v2";
 
 export type FunnelAnswers = {
-  // Lexi situationship quiz answers (Screens 3–8)
+  // Onboarding (Screens 2–4)
+  decodingTarget?: string;
+  demographics?: string;
+  timeline?: string;
+
+  // Lexi situationship quiz answers
   peaceBreaker?: string;
   overthinking?: string;
   digitalAnxiety?: string;

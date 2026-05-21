@@ -5,6 +5,9 @@ const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 type AnalyzeBody = {
   evidenceText?: string;
   answers?: {
+    decodingTarget?: string;
+    demographics?: string;
+    timeline?: string;
     peaceBreaker?: string;
     overthinking?: string;
     digitalAnxiety?: string;

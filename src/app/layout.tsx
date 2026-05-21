@@ -1,5 +1,10 @@
 import type { Metadata } from "next";
-import { Quicksand, Cormorant_Garamond, Poppins } from "next/font/google";
+import {
+  Caveat,
+  Cormorant_Garamond,
+  Poppins,
+  Quicksand,
+} from "next/font/google";
 import "./globals.css";
 
 const quicksand = Quicksand({
@@ -20,6 +25,13 @@ const poppins = Poppins({
   variable: "--font-poppins",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800", "900"],
+});
+
+// Fallback for Bumbbled until public/fonts/Bumbbled-Regular.* is added
+const lexiScript = Caveat({
+  variable: "--font-lexi-script",
+  subsets: ["latin"],
+  weight: "400",
 });
 
 export const metadata: Metadata = {
@@ -47,7 +59,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${quicksand.variable} ${cormorantGaramond.variable} ${poppins.variable} font-sans`}
+        className={`${quicksand.variable} ${cormorantGaramond.variable} ${poppins.variable} ${lexiScript.variable} font-sans`}
       >
         <div className="background-pattern"></div>
         {children}

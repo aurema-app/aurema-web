@@ -50,6 +50,9 @@ export function AnalyzingStep() {
     const body = {
       evidenceText: answers.evidenceText ?? "",
       answers: {
+        decodingTarget: answers.decodingTarget,
+        demographics: answers.demographics,
+        timeline: answers.timeline,
         peaceBreaker: answers.peaceBreaker,
         overthinking: answers.overthinking,
         digitalAnxiety: answers.digitalAnxiety,

@@ -6,6 +6,7 @@ import Link from "next/link";
 
 import { Box, Button, Spinner, Text, VStack } from "@chakra-ui/react";
 
+import { DUMMY_PURCHASE_KEY } from "@/funnel/paywall/dummyPackages";
 import { getRevenueCat } from "@/funnel/services/revenueCatClient";
 import { useFunnelContext } from "@/funnel/state/FunnelContext";
 import { EVENTS, track } from "@/funnel/analytics/track";
@@ -56,6 +57,13 @@ export default function ActivatePage() {
       process.env.NEXT_PUBLIC_AUREMA_BACKEND_URL ?? "http://localhost:4000";
 
     const check = async () => {
+      if (sessionStorage.getItem(DUMMY_PURCHASE_KEY)) {
+        sessionStorage.removeItem(DUMMY_PURCHASE_KEY);
+        track(EVENTS.SUBSCRIPTION_ACTIVATED, { method: "dummy_preview" });
+        setState({ kind: "success" });
+        return;
+      }
+
       const start = Date.now();
 
       // Phase 1: poll /api/user (proxied to aurema-backend) for up to 10s.
