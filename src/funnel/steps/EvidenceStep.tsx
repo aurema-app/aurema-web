@@ -20,23 +20,77 @@ const QUICK_CHIPS = [
   "I'm not looking for anything serious but let's keep hanging out",
 ];
 
+const MAX_IMAGES = 3;
+
+function readFileAsDataURL(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
 export function EvidenceStep() {
   const [text, setText] = useState("");
-  const [uploading] = useState(false);
+  const [images, setImages] = useState<string[]>([]);
+  const [isChipSelected, setIsChipSelected] = useState(false);
+  const [loadingImages, setLoadingImages] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const { setAnswer } = useFunnelAnswers();
   const { goNext } = useFunnelNavigation();
 
   const handleChip = (chip: string) => {
-    setText((prev) => (prev ? `${prev}\n${chip}` : chip));
+    setText(chip);
+    setIsChipSelected(true);
   };
 
+  const handleTextChange = (value: string) => {
+    setText(value);
+    setIsChipSelected(false);
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    if (!files.length) return;
+
+    setLoadingImages(true);
+    try {
+      const remaining = MAX_IMAGES - images.length;
+      const toProcess = files.slice(0, remaining);
+      const dataUrls = await Promise.all(toProcess.map(readFileAsDataURL));
+      setImages((prev) => [...prev, ...dataUrls]);
+    } catch {
+      // Silently drop unreadable files
+    } finally {
+      setLoadingImages(false);
+      // Reset so same file can be re-selected
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  };
+
+  const removeImage = (idx: number) => {
+    setImages((prev) => prev.filter((_, i) => i !== idx));
+  };
+
+  const canSubmit = text.trim().length > 0 || images.length > 0;
+
   const handleSubmit = () => {
-    const evidence = text.trim();
-    if (!evidence) return;
-    setAnswer("evidenceText", evidence);
-    track(EVENTS.STEP_EXIT, { step: "evidence", hasText: true });
+    if (!canSubmit) return;
+
+    const evidenceType =
+      images.length > 0 ? "screenshot" : isChipSelected ? "chip" : "text";
+
+    setAnswer("evidenceText", text.trim());
+    setAnswer("evidenceImages", images.length > 0 ? images : undefined);
+    setAnswer("evidenceType", evidenceType);
+    track(EVENTS.STEP_EXIT, {
+      step: "evidence",
+      evidenceType,
+      hasText: text.trim().length > 0,
+      imageCount: images.length,
+    });
     goNext();
   };
 
@@ -81,8 +135,11 @@ export function EvidenceStep() {
             bg="card.bg"
             borderRadius="2xl"
             border="1.5px solid"
-            borderColor="border.light"
+            borderColor={
+              text.trim() && !isChipSelected ? "brand.primary" : "border.light"
+            }
             overflow="hidden"
+            transition="border-color 0.15s"
           >
             <Box px={4} pt={3} pb={1}>
               <Text
@@ -97,7 +154,7 @@ export function EvidenceStep() {
             </Box>
             <Textarea
               value={text}
-              onChange={(e) => setText(e.target.value)}
+              onChange={(e) => handleTextChange(e.target.value)}
               placeholder="Paste a confusing text, a recurring excuse they use, or just vent the situation here..."
               border="none"
               focusRingColor="transparent"
@@ -134,8 +191,16 @@ export function EvidenceStep() {
                   py={2}
                   borderRadius="full"
                   border="1.5px solid"
-                  borderColor="border.light"
-                  bg="card.bg"
+                  borderColor={
+                    isChipSelected && text === chip
+                      ? "brand.primary"
+                      : "border.light"
+                  }
+                  bg={
+                    isChipSelected && text === chip
+                      ? "lexi.primaryLight"
+                      : "card.bg"
+                  }
                   fontSize="xs"
                   fontWeight="600"
                   color="fg.default"
@@ -155,55 +220,114 @@ export function EvidenceStep() {
             </Wrap>
           </Box>
 
-          {/* Option 3 — File upload */}
-          <Box
-            as="button"
-            border="2px dashed"
-            borderColor="border.light"
-            borderRadius="2xl"
-            p={4}
-            textAlign="center"
-            cursor="pointer"
-            transition="all 0.18s"
-            _hover={{
-              borderColor: "brand.secondary",
-              bg: "lexi.lavenderLight",
-            }}
-            onClick={() => fileRef.current?.click()}
-          >
-            <Text fontSize="sm" color="fg.muted" fontWeight="600">
-              📎 Upload a screenshot (JPEG/PNG)
-            </Text>
-            <Text fontSize="xs" color="fg.muted" mt={1} opacity="0.7">
-              Tap to attach
-            </Text>
-          </Box>
-          <input
-            ref={fileRef}
-            type="file"
-            accept="image/jpeg,image/png"
-            style={{ display: "none" }}
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file && !text) {
-                setText(`[Screenshot uploaded: ${file.name}]`);
+          {/* Option 3 — Screenshot upload */}
+          <Box>
+            <Box
+              as="button"
+              border="2px dashed"
+              borderColor={images.length > 0 ? "brand.primary" : "border.light"}
+              borderRadius="2xl"
+              p={4}
+              textAlign="center"
+              cursor={images.length >= MAX_IMAGES ? "default" : "pointer"}
+              transition="all 0.18s"
+              w="full"
+              _hover={
+                images.length < MAX_IMAGES
+                  ? { borderColor: "brand.secondary", bg: "lexi.lavenderLight" }
+                  : {}
               }
-            }}
-          />
+              onClick={() => {
+                if (images.length < MAX_IMAGES) fileRef.current?.click();
+              }}
+            >
+              {loadingImages ? (
+                <Text fontSize="sm" color="fg.muted" fontWeight="600">
+                  Loading...
+                </Text>
+              ) : (
+                <>
+                  <Text fontSize="sm" color="fg.muted" fontWeight="600">
+                    📎{" "}
+                    {images.length === 0
+                      ? "Upload screenshots (JPEG/PNG)"
+                      : images.length >= MAX_IMAGES
+                        ? `${MAX_IMAGES} screenshots added`
+                        : `Add more screenshots (${images.length}/${MAX_IMAGES})`}
+                  </Text>
+                  {images.length === 0 && (
+                    <Text fontSize="xs" color="fg.muted" mt={1} opacity={0.7}>
+                      Tap to attach · up to {MAX_IMAGES} images
+                    </Text>
+                  )}
+                </>
+              )}
+            </Box>
+
+            {/* Thumbnails */}
+            {images.length > 0 && (
+              <Wrap gap={2} mt={3}>
+                {images.map((url, idx) => (
+                  <Box key={idx} position="relative" w="72px" h="72px">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={url}
+                      alt={`Screenshot ${idx + 1}`}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                        borderRadius: "12px",
+                      }}
+                    />
+                    <Box
+                      as="button"
+                      position="absolute"
+                      top="-6px"
+                      right="-6px"
+                      w="20px"
+                      h="20px"
+                      borderRadius="full"
+                      bg="brand.primary"
+                      color="white"
+                      fontSize="10px"
+                      fontWeight="800"
+                      display="flex"
+                      alignItems="center"
+                      justifyContent="center"
+                      cursor="pointer"
+                      onClick={() => removeImage(idx)}
+                    >
+                      ✕
+                    </Box>
+                  </Box>
+                ))}
+              </Wrap>
+            )}
+
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              multiple
+              style={{ display: "none" }}
+              onChange={handleImageUpload}
+            />
+          </Box>
         </VStack>
 
         <Button
-          bg={text.trim() ? "brand.primary" : "border.light"}
-          color={text.trim() ? "white" : "fg.muted"}
+          bg={canSubmit ? "brand.primary" : "border.light"}
+          color={canSubmit ? "white" : "fg.muted"}
           borderRadius="full"
           py={6}
           w="full"
           fontFamily="body"
           fontWeight="700"
           fontSize="md"
-          disabled={!text.trim() || uploading}
+          disabled={!canSubmit || loadingImages}
           _hover={
-            text.trim()
+            canSubmit
               ? {
                   transform: "translateY(-1px)",
                   boxShadow: "0 8px 24px rgba(236,72,153,0.4)",

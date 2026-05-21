@@ -33,9 +33,19 @@ function readFromStorage(): FunnelAnswers {
   }
 }
 
+// evidenceImages are base64 data URLs — too large for localStorage (5 MB limit).
+// They're only needed in-memory for the EvidenceStep → AnalyzingStep hop.
+const MEMORY_ONLY_KEYS: (keyof FunnelAnswers)[] = ["evidenceImages"];
+
 function writeToStorage(answers: FunnelAnswers): void {
   if (typeof window === "undefined") return;
-  localStorage.setItem(ANSWERS_STORAGE_KEY, JSON.stringify(answers));
+  const toStore = { ...answers };
+  for (const key of MEMORY_ONLY_KEYS) delete toStore[key];
+  try {
+    localStorage.setItem(ANSWERS_STORAGE_KEY, JSON.stringify(toStore));
+  } catch {
+    // Quota errors on other browsers / private mode — non-fatal.
+  }
 }
 
 export function FunnelProvider({ children }: { children: React.ReactNode }) {

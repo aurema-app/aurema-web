@@ -1,5 +1,5 @@
-// Bump to v2 — shape changed with Lexi funnel; v1 answers are discarded on load.
-export const ANSWERS_STORAGE_KEY = "lexi.funnel.answers.v2";
+// Bump to v3 — added evidence images + richer LLM result fields.
+export const ANSWERS_STORAGE_KEY = "lexi.funnel.answers.v3";
 
 export type FunnelAnswers = {
   // Onboarding (Screens 2–4)
@@ -17,10 +17,16 @@ export type FunnelAnswers = {
 
   // Evidence drop (Screen 10)
   evidenceText?: string;
+  // base64 data URLs (jpeg/png) — max 3
+  evidenceImages?: string[];
+  // "text" = typed/pasted, "screenshot" = image upload, "chip" = preset excuse selected
+  evidenceType?: "text" | "screenshot" | "chip";
 
   // LLM analysis result (Screen 11→12)
   lexiExtractedPhrase?: string;
   lexiPattern?: string;
+  lexiTeaserCopy?: string;
+  lexiPaywallHook?: string;
 
   // Lead + auth
   userEmail?: string;

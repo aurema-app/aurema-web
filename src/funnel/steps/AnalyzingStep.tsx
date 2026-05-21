@@ -23,7 +23,7 @@ const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
 export function AnalyzingStep() {
   const [msgIdx, setMsgIdx] = useState(0);
   const [progress, setProgress] = useState(0);
-  const [error, setError] = useState<string | null>(null);
+  const [apiError, setApiError] = useState<string | null>(null);
 
   const { answers, setAnswer } = useFunnelAnswers();
   const { goNext } = useFunnelNavigation();
@@ -49,6 +49,8 @@ export function AnalyzingStep() {
 
     const body = {
       evidenceText: answers.evidenceText ?? "",
+      evidenceImages: answers.evidenceImages,
+      evidenceType: answers.evidenceType ?? "text",
       answers: {
         decodingTarget: answers.decodingTarget,
         demographics: answers.demographics,
@@ -62,44 +64,61 @@ export function AnalyzingStep() {
       },
     };
 
-    fetch("/api/lexi/analyze", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    })
-      .then(async (res) => {
+    const startedAt = Date.now();
+    const MIN_ANIM_MS = 3000;
+
+    const run = async () => {
+      try {
+        const res = await fetch("/api/lexi/analyze", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+
         const json = (await res.json()) as {
-          phrase?: string;
-          pattern?: string;
+          spicy_detail?: string;
+          detected_pattern?: string;
+          teaser_copy?: string;
+          paywall_hook?: string;
           error?: string;
         };
-        if (json.error) throw new Error(json.error);
+
+        if (!res.ok || json.error) {
+          // Surface the real error — stays on this screen so you can see it.
+          setApiError(json.error ?? `HTTP ${res.status}`);
+          return;
+        }
+
         setAnswer(
           "lexiExtractedPhrase",
-          json.phrase ?? "I just need some space right now",
+          json.spicy_detail ?? "I just need some space right now",
         );
         setAnswer(
           "lexiPattern",
-          json.pattern ?? "Classic avoidant reinforcement loop.",
-        );
-      })
-      .catch(() => {
-        // Graceful fallback — still advance to teaser
-        setError("Analysis complete.");
-        setAnswer(
-          "lexiExtractedPhrase",
-          answers.evidenceText?.slice(0, 60) ??
-            "I just need some space right now",
+          json.detected_pattern ?? "Avoidant Reinforcement Loop",
         );
         setAnswer(
-          "lexiPattern",
-          "Lexi detected a high-loop risk pattern in your data.",
+          "lexiTeaserCopy",
+          json.teaser_copy ??
+            "They are keeping you close enough to hope, but far enough to not ask for more.",
         );
-      })
-      .finally(() => {
-        // Wait at least 4 s of animation before advancing
-        setTimeout(() => goNext(), Math.max(0, 4000));
-      });
+        setAnswer(
+          "lexiPaywallHook",
+          json.paywall_hook ??
+            "Your full Delusion Score and Red Flag breakdown are ready.",
+        );
+
+        // Wait for minimum animation time, then advance.
+        const elapsed = Date.now() - startedAt;
+        setTimeout(() => goNext(), Math.max(0, MIN_ANIM_MS - elapsed));
+      } catch (err) {
+        setApiError(
+          err instanceof Error ? err.message : "Network error — check console.",
+        );
+      }
+    };
+
+    void run();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -173,10 +192,37 @@ export function AnalyzingStep() {
           </Text>
         </motion.div>
 
-        {error && (
-          <Text fontSize="xs" color="fg.muted" mt={2}>
-            {error}
-          </Text>
+        {apiError && (
+          <Box
+            mt={4}
+            px={4}
+            py={3}
+            bg="red.50"
+            border="1px solid"
+            borderColor="red.200"
+            borderRadius="xl"
+            maxW="340px"
+            mx="auto"
+          >
+            <Text
+              fontSize="xs"
+              fontWeight="700"
+              color="red.600"
+              mb={1}
+              textTransform="uppercase"
+              letterSpacing="wide"
+            >
+              API Error
+            </Text>
+            <Text
+              fontSize="xs"
+              color="red.700"
+              fontFamily="mono"
+              lineHeight="1.6"
+            >
+              {apiError}
+            </Text>
+          </Box>
         )}
       </Box>
 

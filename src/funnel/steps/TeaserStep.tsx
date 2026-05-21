@@ -15,9 +15,13 @@ export function TeaserStep() {
 
   const phrase =
     answers.lexiExtractedPhrase ?? "I just need some space right now";
-  const pattern =
-    answers.lexiPattern ??
-    "Lexi detected a high-loop risk pattern in your data. Classic avoidant reinforcement loop identified.";
+  const pattern = answers.lexiPattern ?? "Avoidant Reinforcement Loop";
+  const teaserCopy =
+    answers.lexiTeaserCopy ??
+    "They are keeping you close enough to hope, but far enough to not ask for more.";
+  const paywallHook =
+    answers.lexiPaywallHook ??
+    "Your full Delusion Score, Red Flag breakdown, and custom Next-Move strategy are ready.";
 
   const handleUnlock = () => {
     track(EVENTS.STEP_EXIT, { step: "teaser" });
@@ -129,7 +133,7 @@ export function TeaserStep() {
           >
             Analysis Complete.{" "}
             <Text as="span" color="brand.primary">
-              Verdict: High Loop Risk.
+              Verdict: {pattern}.
             </Text>
           </Text>
         </motion.div>
@@ -177,10 +181,51 @@ export function TeaserStep() {
           </Box>
         </motion.div>
 
+        {/* Lexi's punchy teaser copy */}
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.45 }}
+        >
+          <Box
+            bg="lexi.cardFeedback"
+            borderRadius="2xl"
+            px={5}
+            py={4}
+            position="relative"
+          >
+            <Box
+              position="absolute"
+              top="5px"
+              left="5px"
+              right="-5px"
+              bottom="-5px"
+              bg="lexi.cardFeedbackShadow"
+              borderRadius="2xl"
+              zIndex={0}
+            />
+            <Box position="relative" zIndex={1}>
+              <Text fontFamily="script" fontSize="12px" color="fg.muted" mb={1}>
+                Lexi says
+              </Text>
+              <Text
+                fontFamily="body"
+                fontSize="sm"
+                fontWeight="600"
+                fontStyle="italic"
+                color="fg.default"
+                lineHeight="1.6"
+              >
+                &ldquo;{teaserCopy}&rdquo;
+              </Text>
+            </Box>
+          </Box>
+        </motion.div>
+
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.35, delay: 0.5 }}
+          transition={{ duration: 0.35, delay: 0.55 }}
         >
           <Text
             fontSize="xs"
@@ -189,8 +234,7 @@ export function TeaserStep() {
             lineHeight="1.6"
             textAlign="center"
           >
-            Your full <strong>Delusion Score</strong>, Red Flag breakdown, and
-            custom Next-Move strategy are ready.
+            {paywallHook}
           </Text>
         </motion.div>
 
