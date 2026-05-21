@@ -196,19 +196,46 @@ export default function PaywallPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [answers.firebaseUid, dummyMode]);
 
-  const handleDummyPurchase = () => {
+  const handleDummyPurchase = async () => {
     const plan =
       state.kind === "ready"
         ? state.plans.find((p) => p.id === selectedId)
         : null;
-    track(EVENTS.PURCHASE_COMPLETED, {
-      mode: "dummy",
-      package_id: selectedId,
-      price_formatted: plan?.price,
+    if (!plan) return;
+
+    setIsPurchasing(true);
+    setPurchaseError(null);
+
+    track(EVENTS.PURCHASE_STARTED, {
+      mode: "stripe",
+      package_id: plan.id,
+      price_formatted: plan.price,
     });
-    setAmplitudeUserProperties({ plan_type: selectedId, subscribed: true });
-    sessionStorage.setItem(DUMMY_PURCHASE_KEY, "1");
-    router.push("/growth-plan/activate");
+
+    try {
+      const res = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          planId: plan.id,
+          planLabel: plan.label,
+          priceFormatted: plan.price,
+          email: answers.userEmail,
+        }),
+      });
+
+      const json = (await res.json()) as { url?: string; error?: string };
+
+      if (!res.ok || !json.url) {
+        throw new Error(json.error ?? "Could not create checkout session.");
+      }
+
+      // Navigate to Stripe Checkout (or mock URL if no key configured).
+      window.location.href = json.url;
+    } catch (err) {
+      setIsPurchasing(false);
+      setPurchaseError(err instanceof Error ? err.message : "Checkout failed.");
+    }
   };
 
   const handleLivePurchase = async () => {
@@ -355,22 +382,6 @@ export default function PaywallPage() {
   return (
     <PageShell>
       <VStack gap={6} align="stretch" flex="1">
-        {mode === "dummy" && (
-          <Text
-            fontSize="11px"
-            fontWeight="600"
-            color="fg.muted"
-            textAlign="center"
-            bg="lexi.cardFeedback"
-            borderRadius="full"
-            px={3}
-            py={1}
-            alignSelf="center"
-          >
-            Preview mode — no charge
-          </Text>
-        )}
-
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -566,10 +577,8 @@ export default function PaywallPage() {
           {isPurchasing ? (
             <Box display="flex" alignItems="center" gap={2}>
               <Spinner size="sm" />
-              <Text>Processing…</Text>
+              <Text>Redirecting to checkout…</Text>
             </Box>
-          ) : mode === "dummy" ? (
-            "Continue (preview)"
           ) : (
             "Get Instant Clarity"
           )}

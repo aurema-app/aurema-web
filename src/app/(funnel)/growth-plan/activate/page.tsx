@@ -1,15 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 import { Box, Button, Spinner, Text, VStack } from "@chakra-ui/react";
 
-import { DUMMY_PURCHASE_KEY } from "@/funnel/paywall/dummyPackages";
 import { getRevenueCat } from "@/funnel/services/revenueCatClient";
 import { useFunnelContext } from "@/funnel/state/FunnelContext";
 import { EVENTS, track } from "@/funnel/analytics/track";
+import { setAmplitudeUserProperties } from "@/funnel/analytics/amplitudeClient";
 
 // Confirm the entitlement ID matches what is configured in the RC dashboard
 // and used by aurema-app (mobile). Open question tracked in PROGRESS.md.
@@ -47,8 +48,9 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-export default function ActivatePage() {
+function ActivatePage() {
   const { answers, resetAnswers } = useFunnelContext();
+  const searchParams = useSearchParams();
   const [state, setState] = useState<PageState>({ kind: "checking" });
 
   useEffect(() => {
@@ -57,9 +59,33 @@ export default function ActivatePage() {
       process.env.NEXT_PUBLIC_AUREMA_BACKEND_URL ?? "http://localhost:4000";
 
     const check = async () => {
-      if (sessionStorage.getItem(DUMMY_PURCHASE_KEY)) {
-        sessionStorage.removeItem(DUMMY_PURCHASE_KEY);
-        track(EVENTS.SUBSCRIPTION_ACTIVATED, { method: "dummy_preview" });
+      // Stripe Checkout success return — session_id is in the URL.
+      const sessionId = searchParams.get("session_id");
+      const planId = searchParams.get("plan");
+      const isMock = searchParams.get("mock") === "1";
+
+      if (sessionId) {
+        // Returning from real Stripe Checkout — fire completion events.
+        track(EVENTS.CHECKOUT_SUBMITTED, {
+          method: "stripe",
+          session_id: sessionId,
+          plan_id: planId ?? "unknown",
+        });
+        track(EVENTS.PURCHASE_COMPLETED, {
+          method: "stripe",
+          session_id: sessionId,
+          plan_id: planId ?? "unknown",
+        });
+        setAmplitudeUserProperties({
+          subscribed: true,
+          plan_type: planId ?? "unknown",
+        });
+        setState({ kind: "success" });
+        return;
+      }
+
+      if (isMock) {
+        // Mock checkout page already fired the events — just show success.
         setState({ kind: "success" });
         return;
       }
@@ -103,7 +129,8 @@ export default function ActivatePage() {
 
     check();
     return () => controller.abort();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   const Shell = ({ children }: { children: React.ReactNode }) => (
     <Box
@@ -260,5 +287,13 @@ export default function ActivatePage() {
         </Button>
       </VStack>
     </Shell>
+  );
+}
+
+export default function ActivatePageWrapper() {
+  return (
+    <Suspense>
+      <ActivatePage />
+    </Suspense>
   );
 }

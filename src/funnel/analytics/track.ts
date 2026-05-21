@@ -20,6 +20,8 @@ export const EVENTS = {
   // Paywall + purchase
   PAYWALL_VIEWED: "paywall_viewed",
   PURCHASE_STARTED: "purchase_started",
+  // Fires when the user submits card details — strongest purchase-intent signal.
+  CHECKOUT_SUBMITTED: "checkout_submitted",
   PURCHASE_COMPLETED: "purchase_completed",
   PURCHASE_FAILED: "purchase_failed",
   // Activation
