@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useRef, useState } from "react";
 
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -49,6 +49,16 @@ function CheckoutPage() {
   const [name, setName] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const cardStartedRef = useRef(false);
+
+  const handleCardFocus = () => {
+    if (cardStartedRef.current) return;
+    cardStartedRef.current = true;
+    track(EVENTS.CARD_DETAILS_STARTED, {
+      plan_id: planId,
+      email: answers.userEmail,
+    });
+  };
 
   const isComplete =
     cardNumber.replace(/\s/g, "").length === 16 &&
@@ -176,6 +186,7 @@ function CheckoutPage() {
                   placeholder="Name on card"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
+                  onFocus={handleCardFocus}
                   autoComplete="cc-name"
                 />
 
@@ -187,6 +198,7 @@ function CheckoutPage() {
                   onChange={(e) =>
                     setCardNumber(formatCardNumber(e.target.value))
                   }
+                  onFocus={handleCardFocus}
                   inputMode="numeric"
                   autoComplete="cc-number"
                 />
@@ -198,6 +210,7 @@ function CheckoutPage() {
                     placeholder="MM / YY"
                     value={expiry}
                     onChange={(e) => setExpiry(formatExpiry(e.target.value))}
+                    onFocus={handleCardFocus}
                     inputMode="numeric"
                     autoComplete="cc-exp"
                     flex="1"
@@ -209,6 +222,7 @@ function CheckoutPage() {
                     onChange={(e) =>
                       setCvc(e.target.value.replace(/\D/g, "").slice(0, 4))
                     }
+                    onFocus={handleCardFocus}
                     inputMode="numeric"
                     autoComplete="cc-csc"
                     flex="1"

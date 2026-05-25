@@ -3,18 +3,15 @@
 import { useEffect, useRef, useState } from "react";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { Box, Button, Spinner, Text, VStack } from "@chakra-ui/react";
-import { motion } from "framer-motion";
 import type { Package, PurchasesError } from "@revenuecat/purchases-js";
 import { PackageType } from "@revenuecat/purchases-js";
 
-import { GrowthPlanPolicy } from "@/funnel/components/GrowthPlanPolicy";
-import { LexiAvatar } from "@/funnel/components/lexi/LexiAvatar";
 import {
   DUMMY_PAYWALL_PLANS,
-  DUMMY_PURCHASE_KEY,
   type PaywallPlan,
 } from "@/funnel/paywall/dummyPackages";
 import {
@@ -34,19 +31,6 @@ type PageState =
   | { kind: "no-offerings" }
   | { kind: "error"; message: string };
 
-const VALUE_PROPS = [
-  "Break toxic emotional cycles before attachment locks in.",
-  "Stop confusing situational anxiety with a deep connection.",
-  "Get a custom response strategy: Know exactly what to text next.",
-  "Get what your friends are tired of repeating.",
-] as const;
-
-const TRUST_BADGES = [
-  "Safe & Secure Checkout",
-  "Instant Digital Delivery",
-  "Cancel Anytime",
-] as const;
-
 function useDummyPaywall(firebaseUid: string | undefined): boolean {
   if (!isRevenueCatEnabled()) return true;
   return Boolean(firebaseUid?.startsWith("email:"));
@@ -55,24 +39,28 @@ function useDummyPaywall(firebaseUid: string | undefined): boolean {
 function packageToPlan(pkg: Package, index: number): PaywallPlan {
   const label =
     pkg.packageType === PackageType.Annual
-      ? "Annual"
+      ? "1 year"
       : pkg.packageType === PackageType.Monthly
-        ? "Monthly"
+        ? "1 month"
         : pkg.webBillingProduct.title;
 
-  const note =
+  const rawPrice = pkg.webBillingProduct.currentPrice.amountMicros / 1_000_000;
+  const days =
     pkg.packageType === PackageType.Annual
-      ? "Best value · per year"
+      ? 365
       : pkg.packageType === PackageType.Monthly
-        ? "Cancel anytime · per month"
-        : "";
+        ? 30
+        : 7;
+  const perDay = (rawPrice / days).toFixed(2);
 
   return {
     id: pkg.identifier,
     label,
-    note,
+    savePct: index === 0 ? 70 : 65,
+    originalPrice: "",
     price: pkg.webBillingProduct.currentPrice.formattedPrice,
-    isMostPopular: index === 0,
+    perDay: `$${perDay}`,
+    isMostPopular: index === 1,
   };
 }
 
@@ -115,25 +103,160 @@ function PageShell({
             "&::-webkit-scrollbar": { display: "none" },
           }}
         >
-          <Box
-            mx="auto"
-            position="relative"
-            h="36px"
-            w="88px"
-            mb={6}
-            flexShrink={0}
-          >
-            <Image
-              src="/lexi/logo.png"
-              alt="Lexi"
-              fill
-              style={{ objectFit: "contain" }}
-              priority
-            />
+          {/* Logo */}
+          <Box display="flex" justifyContent="center" pt={2} mb={6}>
+            <Box position="relative" h="36px" w="88px">
+              <Image
+                src="/lexi/logo.png"
+                alt="Lexi"
+                fill
+                style={{ objectFit: "contain" }}
+                priority
+              />
+            </Box>
           </Box>
           {children}
         </Box>
         {footer}
+      </Box>
+    </Box>
+  );
+}
+
+function PlanCard({
+  plan,
+  isSelected,
+  onSelect,
+}: {
+  plan: PaywallPlan;
+  isSelected: boolean;
+  onSelect: () => void;
+}) {
+  return (
+    <Box position="relative">
+      {plan.isMostPopular && (
+        <Box
+          position="absolute"
+          top={0}
+          left={0}
+          right={0}
+          bg="#A78BDA"
+          borderTopRadius="16px"
+          py="6px"
+          textAlign="center"
+          zIndex={1}
+        >
+          <Text
+            fontSize="11px"
+            fontWeight="800"
+            color="white"
+            letterSpacing="wider"
+            textTransform="uppercase"
+          >
+            Most Popular
+          </Text>
+        </Box>
+      )}
+
+      <Box
+        as="button"
+        onClick={onSelect}
+        w="full"
+        textAlign="left"
+        borderRadius="16px"
+        border="2px solid"
+        borderColor={isSelected ? "#A78BDA" : "#DDD6F8"}
+        bg={isSelected ? "#EDE8FF" : "white"}
+        px={4}
+        pt={plan.isMostPopular ? "36px" : "14px"}
+        pb="14px"
+        cursor="pointer"
+        transition="all 0.18s"
+        _hover={{ borderColor: "#A78BDA" }}
+        display="flex"
+        alignItems="center"
+        gap={3}
+      >
+        {/* Radio dot */}
+        <Box
+          w="20px"
+          h="20px"
+          borderRadius="full"
+          border="2px solid"
+          borderColor={isSelected ? "#A78BDA" : "#C4B8F0"}
+          bg="white"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          flexShrink={0}
+        >
+          {isSelected && (
+            <Box w="10px" h="10px" borderRadius="full" bg="#A78BDA" />
+          )}
+        </Box>
+
+        {/* Left: label + badge + prices */}
+        <Box flex="1">
+          <Text
+            fontFamily="body"
+            fontSize="18px"
+            fontWeight="800"
+            color="fg.default"
+            fontStyle="italic"
+            lineHeight="1.2"
+          >
+            {plan.label}
+          </Text>
+          <Box display="flex" alignItems="center" gap={2} mt={1}>
+            <Box px="8px" py="2px" borderRadius="full" bg="#E8E0FF">
+              <Text fontSize="11px" fontWeight="700" color="#7C5DC7">
+                SAVE {plan.savePct}%
+              </Text>
+            </Box>
+          </Box>
+          {plan.originalPrice && (
+            <Text
+              fontSize="12px"
+              color="fg.muted"
+              mt={1}
+              textDecoration="line-through"
+            >
+              {plan.originalPrice}{" "}
+              <Text
+                as="span"
+                textDecoration="none"
+                color="fg.default"
+                fontWeight="600"
+              >
+                {plan.price}
+              </Text>
+            </Text>
+          )}
+        </Box>
+
+        {/* Right: per-day price */}
+        <Box textAlign="right" flexShrink={0}>
+          <Text fontSize="13px" color="fg.muted" fontWeight="500">
+            $
+          </Text>
+          <Text
+            fontFamily="body"
+            fontSize={plan.isMostPopular ? "48px" : "36px"}
+            fontWeight="900"
+            color="fg.default"
+            lineHeight="1"
+          >
+            {plan.perDay.replace("$0.", "0.").replace("$1.", "1.")}
+          </Text>
+          <Text
+            fontSize="10px"
+            color="fg.muted"
+            fontWeight="600"
+            letterSpacing="wide"
+          >
+            PER DAY
+          </Text>
+        </Box>
       </Box>
     </Box>
   );
@@ -251,7 +374,6 @@ export default function PaywallPage() {
         throw new Error(json.error ?? "Could not create checkout session.");
       }
 
-      // Navigate to Stripe Checkout (or mock URL if no key configured).
       window.location.href = json.url;
     } catch (err) {
       setIsPurchasing(false);
@@ -399,8 +521,9 @@ export default function PaywallPage() {
   }
 
   const { plans, mode } = state;
+  const selectedPlan = plans.find((p) => p.id === selectedId);
 
-  const paywallFooter = (
+  const footer = (
     <Box
       flexShrink={0}
       w="full"
@@ -408,8 +531,6 @@ export default function PaywallPage() {
       pt={3}
       pb="max(16px, env(safe-area-inset-bottom))"
       bg={SURFACE}
-      borderTop="1px solid"
-      borderColor="lexi.border"
     >
       {purchaseError && (
         <Text
@@ -432,6 +553,7 @@ export default function PaywallPage() {
         fontFamily="display"
         fontWeight="700"
         fontSize="17px"
+        fontStyle="italic"
         disabled={!selectedId || isPurchasing}
         _hover={{
           transform: selectedId ? "translateY(-2px)" : undefined,
@@ -447,197 +569,75 @@ export default function PaywallPage() {
         {isPurchasing ? (
           <Box display="flex" alignItems="center" gap={2}>
             <Spinner size="sm" />
-            <Text>Redirecting to checkout…</Text>
+            <Text>Redirecting...</Text>
           </Box>
+        ) : selectedPlan ? (
+          `Buy with ${selectedPlan.savePct}% discount`
         ) : (
-          "Get Instant Clarity"
+          "Choose a plan"
         )}
       </Button>
 
-      <Box
-        display="flex"
-        justifyContent="center"
-        gap={4}
-        flexWrap="wrap"
+      {/* Disclaimer */}
+      <Text
+        fontSize="11px"
+        color="fg.muted"
+        fontWeight="400"
+        textAlign="center"
+        lineHeight="1.6"
         mt={3}
+        px={2}
       >
-        {TRUST_BADGES.map((badge) => (
-          <Text
-            key={badge}
-            fontSize="10px"
-            color="fg.muted"
-            fontWeight="600"
-            letterSpacing="wide"
-          >
-            🔒 {badge}
-          </Text>
-        ))}
-      </Box>
+        We&apos;ve automatically applied a discount to your first subscription
+        price. Please note that your subscription will be automatically renewed
+        at full price at the end of the intro period. Learn more about
+        cancellation and refund policy in{" "}
+        <Link href="/terms" style={{ textDecoration: "underline" }}>
+          Subscription Policy
+        </Link>
+        .
+      </Text>
 
-      <GrowthPlanPolicy />
+      {/* Payment method icons */}
+      <Box display="flex" justifyContent="center" mt={3} mb={1}>
+        <Image
+          src="/lexi/payment-methods.png"
+          alt="Accepted payment methods"
+          width={424}
+          height={140}
+          style={{ width: "auto", height: "70px" }}
+        />
+      </Box>
     </Box>
   );
 
   return (
-    <PageShell footer={paywallFooter}>
-      <VStack gap={6} align="stretch">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.4 }}
-          style={{ textAlign: "center" }}
+    <PageShell footer={footer}>
+      <VStack gap={4} align="stretch">
+        {/* Headline */}
+        <Text
+          fontFamily="body"
+          fontSize="22px"
+          fontWeight="800"
+          color="fg.default"
+          textAlign="center"
+          letterSpacing="-0.3px"
+          fontStyle="italic"
         >
-          <LexiAvatar mood="soft" size="md" />
-        </motion.div>
+          Choose your plan
+        </Text>
 
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.1 }}
-        >
-          <Text
-            fontFamily="body"
-            fontSize={{ base: "xl", md: "2xl" }}
-            fontWeight="900"
-            color="fg.default"
-            lineHeight="1.3"
-            letterSpacing="-0.5px"
-            textAlign="center"
-          >
-            Stop romanticizing people who{" "}
-            <Text as="span" color="brand.primary">
-              never choose you clearly.
-            </Text>
-          </Text>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.35, delay: 0.2 }}
-        >
-          <VStack gap={3} align="stretch">
-            {VALUE_PROPS.map((prop) => (
-              <Box key={prop} display="flex" gap={3} alignItems="flex-start">
-                <Box
-                  w="20px"
-                  h="20px"
-                  borderRadius="full"
-                  bg="lexi.primaryLight"
-                  border="1.5px solid"
-                  borderColor="brand.primary"
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="center"
-                  flexShrink={0}
-                  mt="1px"
-                >
-                  <Text fontSize="9px" color="brand.primary" fontWeight="900">
-                    ✓
-                  </Text>
-                </Box>
-                <Text
-                  fontSize="sm"
-                  fontWeight="600"
-                  color="fg.default"
-                  lineHeight="1.5"
-                >
-                  {prop}
-                </Text>
-              </Box>
-            ))}
-          </VStack>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.3 }}
-        >
-          <VStack gap={3} align="stretch">
-            {plans.map((plan) => {
-              const isSelected = selectedId === plan.id;
-
-              return (
-                <Box
-                  key={plan.id}
-                  as="button"
-                  onClick={() => setSelectedId(plan.id)}
-                  w="full"
-                  textAlign="left"
-                  borderRadius="2xl"
-                  border="2px solid"
-                  borderColor={isSelected ? "brand.primary" : "#E4DBFE"}
-                  bg={isSelected ? "lexi.primaryLight" : "white"}
-                  px={5}
-                  py={4}
-                  cursor="pointer"
-                  transition="all 0.18s"
-                  position="relative"
-                  boxShadow={
-                    isSelected ? "0 4px 20px rgba(236,72,153,0.2)" : "none"
-                  }
-                  _hover={{ borderColor: "brand.primary" }}
-                >
-                  {plan.isMostPopular && (
-                    <Box
-                      position="absolute"
-                      top="-10px"
-                      left="16px"
-                      px={3}
-                      py={0.5}
-                      borderRadius="full"
-                      bg="brand.primary"
-                    >
-                      <Text
-                        fontSize="9px"
-                        fontWeight="800"
-                        color="white"
-                        letterSpacing="wider"
-                        textTransform="uppercase"
-                      >
-                        Most Popular
-                      </Text>
-                    </Box>
-                  )}
-
-                  <Box
-                    display="flex"
-                    justifyContent="space-between"
-                    alignItems="flex-start"
-                  >
-                    <Box>
-                      <Text
-                        fontFamily="body"
-                        fontSize="md"
-                        fontWeight="800"
-                        color="fg.default"
-                      >
-                        {plan.label}
-                      </Text>
-                      <Text
-                        fontSize="xs"
-                        color="fg.muted"
-                        fontWeight="500"
-                        mt={0.5}
-                      >
-                        {plan.note}
-                      </Text>
-                    </Box>
-                    <Text
-                      fontFamily="body"
-                      fontSize="xl"
-                      fontWeight="900"
-                      color={isSelected ? "brand.primary" : "fg.default"}
-                    >
-                      {plan.price}
-                    </Text>
-                  </Box>
-                </Box>
-              );
-            })}
-          </VStack>
-        </motion.div>
+        {/* Plan cards */}
+        <VStack gap={3} align="stretch">
+          {plans.map((plan) => (
+            <PlanCard
+              key={plan.id}
+              plan={plan}
+              isSelected={selectedId === plan.id}
+              onSelect={() => setSelectedId(plan.id)}
+            />
+          ))}
+        </VStack>
 
         {mode === "live" && <Box ref={checkoutRef} w="full" />}
       </VStack>

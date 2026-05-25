@@ -1,10 +1,12 @@
 "use client";
 
 import type { ComponentType } from "react";
-import { notFound } from "next/navigation";
-import { useParams } from "next/navigation";
+import { useEffect, useRef } from "react";
+import { notFound, useParams } from "next/navigation";
 
 import { flow } from "@/funnel/flow/flow";
+import { useFunnelNavigation } from "@/funnel/flow/useFunnelNavigation";
+import { track, EVENTS } from "@/funnel/analytics/track";
 
 // Lexi funnel steps
 import { LandingStep } from "@/funnel/steps/LandingStep";
@@ -24,13 +26,12 @@ import { EvidenceStep } from "@/funnel/steps/EvidenceStep";
 import { AnalyzingStep } from "@/funnel/steps/AnalyzingStep";
 import { TeaserStep } from "@/funnel/steps/TeaserStep";
 
-// Auth + paywall steps (kept from original implementation)
+// Auth + paywall steps
 import { EmailStep } from "@/funnel/steps/EmailStep";
 import { SignInStep } from "@/funnel/steps/SignInStep";
 import { PaywallStep } from "@/funnel/steps/PaywallStep";
 
 const STEP_COMPONENTS: Record<string, ComponentType> = {
-  // Lexi screens 1–12
   landing: LandingStep,
   "decoding-target": DecodingTargetStep,
   demographics: DemographicsStep,
@@ -47,14 +48,46 @@ const STEP_COMPONENTS: Record<string, ComponentType> = {
   evidence: EvidenceStep,
   analyzing: AnalyzingStep,
   teaser: TeaserStep,
-
-  // Lead capture + auth
   email: EmailStep,
   "sign-in": SignInStep,
-
-  // Screen 13 — dedicated paywall page (this component redirects there)
   paywall: PaywallStep,
 };
+
+/**
+ * Fires step_view on mount and step_exit (with dwell time) on unmount.
+ * Runs inside every step so tracking is centralized here rather than
+ * repeated in each step component.
+ */
+function StepTracker({ stepId }: { stepId: string }) {
+  const { currentIndex, totalVisible } = useFunnelNavigation();
+  const enteredAt = useRef(Date.now());
+
+  useEffect(() => {
+    enteredAt.current = Date.now();
+
+    track(EVENTS.STEP_VIEW, {
+      step_id: stepId,
+      step_index: currentIndex,
+      total_steps: totalVisible,
+      funnel_progress_pct:
+        totalVisible > 0
+          ? Math.round((currentIndex / (totalVisible - 1)) * 100)
+          : 0,
+    });
+
+    return () => {
+      track(EVENTS.STEP_EXIT, {
+        step_id: stepId,
+        step_index: currentIndex,
+        duration_ms: Date.now() - enteredAt.current,
+      });
+    };
+    // stepId changing is a new step — re-run this effect.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stepId]);
+
+  return null;
+}
 
 export default function StepPage() {
   const params = useParams();
@@ -70,5 +103,10 @@ export default function StepPage() {
     notFound();
   }
 
-  return <Step />;
+  return (
+    <>
+      <StepTracker stepId={stepId} />
+      <Step />
+    </>
+  );
 }

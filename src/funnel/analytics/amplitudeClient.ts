@@ -7,6 +7,12 @@ export function initAmplitude(): void {
   if (initialized || typeof window === "undefined") return;
   const apiKey = process.env.NEXT_PUBLIC_AMPLITUDE_API_KEY;
   if (!apiKey) {
+    if (process.env.NODE_ENV === "development") {
+      // eslint-disable-next-line no-console
+      console.warn(
+        "[Amplitude] NEXT_PUBLIC_AMPLITUDE_API_KEY is not set — events will not be sent.",
+      );
+    }
     return;
   }
 
@@ -18,12 +24,13 @@ export function initAmplitude(): void {
       formInteractions: false,
       fileDownloads: false,
     },
-    // Flush queued events aggressively so step_exit events aren't lost on navigation.
+    // Flush queued events immediately so step_exit events aren't lost on navigation.
     flushIntervalMillis: 0,
     flushQueueSize: 1,
+    // Use Debug in dev so you can see every event in the browser console.
     logLevel:
       process.env.NODE_ENV === "development"
-        ? amplitude.Types.LogLevel.Warn
+        ? amplitude.Types.LogLevel.Debug
         : amplitude.Types.LogLevel.None,
   });
 
