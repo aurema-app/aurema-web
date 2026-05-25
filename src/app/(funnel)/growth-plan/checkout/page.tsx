@@ -103,118 +103,144 @@ function CheckoutPage() {
 
   return (
     <Box
-      minH="100dvh"
+      h="100dvh"
+      maxH="100dvh"
       w="full"
       bg={SURFACE}
       display="flex"
       flexDirection="column"
       alignItems="center"
+      overflow="hidden"
     >
       <Box
         w="full"
         maxW="430px"
-        flex="1"
+        h="full"
         display="flex"
         flexDirection="column"
         bg={SURFACE}
-        px={5}
         pt="max(24px, env(safe-area-inset-top))"
-        pb="max(20px, env(safe-area-inset-bottom))"
-        gap={6}
       >
-        {/* Logo */}
-        <Box mx="auto" position="relative" h="36px" w="88px" flexShrink={0}>
-          <Image
-            src="/lexi/logo.png"
-            alt="Lexi"
-            fill
-            style={{ objectFit: "contain" }}
-            priority
-          />
-        </Box>
-
-        <motion.div {...fadeUp(0.05)}>
-          <VStack align="stretch" gap={1}>
-            <Text
-              fontFamily="body"
-              fontSize="22px"
-              fontWeight="800"
-              letterSpacing="-0.3px"
-              color="fg.default"
-              lineHeight="1.25"
-            >
-              Complete your purchase
-            </Text>
-            <Text
-              fontFamily="body"
-              fontSize="14px"
-              color="fg.muted"
-              fontWeight="500"
-            >
-              {planLabel}
-            </Text>
-          </VStack>
-        </motion.div>
-
-        <motion.div {...fadeUp(0.1)}>
-          <VStack align="stretch" gap={3}>
-            {/* Name */}
-            <Input
-              {...inputStyles}
-              placeholder="Name on card"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              autoComplete="cc-name"
-            />
-
-            {/* Card number */}
-            <Input
-              {...inputStyles}
-              placeholder="Card number"
-              value={cardNumber}
-              onChange={(e) => setCardNumber(formatCardNumber(e.target.value))}
-              inputMode="numeric"
-              autoComplete="cc-number"
-            />
-
-            {/* Expiry + CVC */}
-            <Box display="flex" gap={3}>
-              <Input
-                {...inputStyles}
-                placeholder="MM / YY"
-                value={expiry}
-                onChange={(e) => setExpiry(formatExpiry(e.target.value))}
-                inputMode="numeric"
-                autoComplete="cc-exp"
-                flex="1"
-              />
-              <Input
-                {...inputStyles}
-                placeholder="CVC"
-                value={cvc}
-                onChange={(e) =>
-                  setCvc(e.target.value.replace(/\D/g, "").slice(0, 4))
-                }
-                inputMode="numeric"
-                autoComplete="cc-csc"
-                flex="1"
+        <Box
+          flex="1"
+          overflowY="auto"
+          overflowX="hidden"
+          minH={0}
+          px={5}
+          pb={3}
+          css={{
+            WebkitOverflowScrolling: "touch",
+            scrollbarWidth: "none",
+            "&::-webkit-scrollbar": { display: "none" },
+          }}
+        >
+          <Box display="flex" flexDirection="column" gap={6}>
+            <Box mx="auto" position="relative" h="36px" w="88px" flexShrink={0}>
+              <Image
+                src="/lexi/logo.png"
+                alt="Lexi"
+                fill
+                style={{ objectFit: "contain" }}
+                priority
               />
             </Box>
-          </VStack>
-        </motion.div>
 
-        {error && (
-          <Text
-            fontFamily="body"
-            fontSize="sm"
-            color="red.500"
-            fontWeight="600"
-          >
-            {error}
-          </Text>
-        )}
+            <motion.div {...fadeUp(0.05)}>
+              <VStack align="stretch" gap={1}>
+                <Text
+                  fontFamily="body"
+                  fontSize="22px"
+                  fontWeight="800"
+                  letterSpacing="-0.3px"
+                  color="fg.default"
+                  lineHeight="1.25"
+                >
+                  Complete your purchase
+                </Text>
+                <Text
+                  fontFamily="body"
+                  fontSize="14px"
+                  color="fg.muted"
+                  fontWeight="500"
+                >
+                  {planLabel}
+                </Text>
+              </VStack>
+            </motion.div>
 
-        <motion.div {...fadeUp(0.15)}>
+            <motion.div {...fadeUp(0.1)}>
+              <VStack align="stretch" gap={3}>
+                {/* Name */}
+                <Input
+                  {...inputStyles}
+                  placeholder="Name on card"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  autoComplete="cc-name"
+                />
+
+                {/* Card number */}
+                <Input
+                  {...inputStyles}
+                  placeholder="Card number"
+                  value={cardNumber}
+                  onChange={(e) =>
+                    setCardNumber(formatCardNumber(e.target.value))
+                  }
+                  inputMode="numeric"
+                  autoComplete="cc-number"
+                />
+
+                {/* Expiry + CVC */}
+                <Box display="flex" gap={3}>
+                  <Input
+                    {...inputStyles}
+                    placeholder="MM / YY"
+                    value={expiry}
+                    onChange={(e) => setExpiry(formatExpiry(e.target.value))}
+                    inputMode="numeric"
+                    autoComplete="cc-exp"
+                    flex="1"
+                  />
+                  <Input
+                    {...inputStyles}
+                    placeholder="CVC"
+                    value={cvc}
+                    onChange={(e) =>
+                      setCvc(e.target.value.replace(/\D/g, "").slice(0, 4))
+                    }
+                    inputMode="numeric"
+                    autoComplete="cc-csc"
+                    flex="1"
+                  />
+                </Box>
+              </VStack>
+            </motion.div>
+          </Box>
+        </Box>
+
+        <Box
+          flexShrink={0}
+          w="full"
+          px={5}
+          pt={3}
+          pb="max(16px, env(safe-area-inset-bottom))"
+          bg={SURFACE}
+          borderTop="1px solid"
+          borderColor="lexi.border"
+        >
+          {error && (
+            <Text
+              fontFamily="body"
+              fontSize="sm"
+              color="red.500"
+              fontWeight="600"
+              mb={3}
+            >
+              {error}
+            </Text>
+          )}
+
           <Button
             bg="brand.primary"
             color="white"
@@ -243,10 +269,14 @@ function CheckoutPage() {
               `Pay ${planId === "annual" ? "$39.99" : "$9.99"}`
             )}
           </Button>
-        </motion.div>
 
-        <motion.div {...fadeUp(0.2)}>
-          <Box display="flex" justifyContent="center" gap={4} flexWrap="wrap">
+          <Box
+            display="flex"
+            justifyContent="center"
+            gap={4}
+            flexWrap="wrap"
+            mt={3}
+          >
             {["🔒 256-bit SSL", "🔒 Secure Checkout", "Cancel Anytime"].map(
               (badge) => (
                 <Text
@@ -261,25 +291,25 @@ function CheckoutPage() {
               ),
             )}
           </Box>
-        </motion.div>
 
-        <Text
-          fontSize="11px"
-          color="fg.muted"
-          fontWeight="500"
-          textAlign="center"
-          mt="auto"
-        >
-          By completing your purchase you agree to our{" "}
-          <Box as="span" textDecoration="underline">
-            Terms
-          </Box>{" "}
-          and{" "}
-          <Box as="span" textDecoration="underline">
-            Privacy Policy
-          </Box>
-          .
-        </Text>
+          <Text
+            fontSize="11px"
+            color="fg.muted"
+            fontWeight="500"
+            textAlign="center"
+            mt={3}
+          >
+            By completing your purchase you agree to our{" "}
+            <Box as="span" textDecoration="underline">
+              Terms
+            </Box>{" "}
+            and{" "}
+            <Box as="span" textDecoration="underline">
+              Privacy Policy
+            </Box>
+            .
+          </Text>
+        </Box>
       </Box>
     </Box>
   );

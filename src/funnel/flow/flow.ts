@@ -16,6 +16,7 @@ export const flow: FunnelStep[] = [
   { id: "peace-breaker" }, // Screen 6 — Fast-tap icebreaker
   { id: "overthinking" },
   { id: "digital-anxiety" },
+  { id: "intuition" },
   { id: "friend-group" },
   { id: "projection" },
   { id: "reinforcement" },

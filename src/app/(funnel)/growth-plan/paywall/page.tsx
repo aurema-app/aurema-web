@@ -76,43 +76,64 @@ function packageToPlan(pkg: Package, index: number): PaywallPlan {
   };
 }
 
-function PageShell({ children }: { children: React.ReactNode }) {
+function PageShell({
+  children,
+  footer,
+}: {
+  children: React.ReactNode;
+  footer?: React.ReactNode;
+}) {
   return (
     <Box
-      minH="100dvh"
+      h="100dvh"
+      maxH="100dvh"
       w="full"
       bg={SURFACE}
       display="flex"
       flexDirection="column"
       alignItems="center"
+      overflow="hidden"
     >
       <Box
         w="full"
         maxW="430px"
-        flex="1"
+        h="full"
         display="flex"
         flexDirection="column"
-        px={5}
         pt="max(24px, env(safe-area-inset-top))"
-        pb="max(20px, env(safe-area-inset-bottom))"
       >
         <Box
-          mx="auto"
-          position="relative"
-          h="36px"
-          w="88px"
-          mb={6}
-          flexShrink={0}
+          flex="1"
+          overflowY="auto"
+          overflowX="hidden"
+          minH={0}
+          px={5}
+          pb={3}
+          css={{
+            WebkitOverflowScrolling: "touch",
+            scrollbarWidth: "none",
+            "&::-webkit-scrollbar": { display: "none" },
+          }}
         >
-          <Image
-            src="/lexi/logo.png"
-            alt="Lexi"
-            fill
-            style={{ objectFit: "contain" }}
-            priority
-          />
+          <Box
+            mx="auto"
+            position="relative"
+            h="36px"
+            w="88px"
+            mb={6}
+            flexShrink={0}
+          >
+            <Image
+              src="/lexi/logo.png"
+              alt="Lexi"
+              fill
+              style={{ objectFit: "contain" }}
+              priority
+            />
+          </Box>
+          {children}
         </Box>
-        {children}
+        {footer}
       </Box>
     </Box>
   );
@@ -379,9 +400,87 @@ export default function PaywallPage() {
 
   const { plans, mode } = state;
 
+  const paywallFooter = (
+    <Box
+      flexShrink={0}
+      w="full"
+      px={5}
+      pt={3}
+      pb="max(16px, env(safe-area-inset-bottom))"
+      bg={SURFACE}
+      borderTop="1px solid"
+      borderColor="lexi.border"
+    >
+      {purchaseError && (
+        <Text
+          fontSize="sm"
+          color="red.500"
+          textAlign="center"
+          fontWeight="600"
+          mb={3}
+        >
+          {purchaseError}
+        </Text>
+      )}
+
+      <Button
+        bg="brand.primary"
+        color="white"
+        borderRadius="full"
+        h="56px"
+        w="full"
+        fontFamily="display"
+        fontWeight="700"
+        fontSize="17px"
+        disabled={!selectedId || isPurchasing}
+        _hover={{
+          transform: selectedId ? "translateY(-2px)" : undefined,
+          boxShadow: selectedId
+            ? "0 12px 32px rgba(236,72,153,0.45)"
+            : undefined,
+        }}
+        _active={{ transform: "translateY(0)" }}
+        _disabled={{ opacity: 0.5, cursor: "not-allowed" }}
+        transition="all 0.2s"
+        onClick={handlePurchase}
+      >
+        {isPurchasing ? (
+          <Box display="flex" alignItems="center" gap={2}>
+            <Spinner size="sm" />
+            <Text>Redirecting to checkout…</Text>
+          </Box>
+        ) : (
+          "Get Instant Clarity"
+        )}
+      </Button>
+
+      <Box
+        display="flex"
+        justifyContent="center"
+        gap={4}
+        flexWrap="wrap"
+        mt={3}
+      >
+        {TRUST_BADGES.map((badge) => (
+          <Text
+            key={badge}
+            fontSize="10px"
+            color="fg.muted"
+            fontWeight="600"
+            letterSpacing="wide"
+          >
+            🔒 {badge}
+          </Text>
+        ))}
+      </Box>
+
+      <GrowthPlanPolicy />
+    </Box>
+  );
+
   return (
-    <PageShell>
-      <VStack gap={6} align="stretch" flex="1">
+    <PageShell footer={paywallFooter}>
+      <VStack gap={6} align="stretch">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -541,64 +640,6 @@ export default function PaywallPage() {
         </motion.div>
 
         {mode === "live" && <Box ref={checkoutRef} w="full" />}
-
-        {purchaseError && (
-          <Text
-            fontSize="sm"
-            color="red.500"
-            textAlign="center"
-            fontWeight="600"
-          >
-            {purchaseError}
-          </Text>
-        )}
-
-        <Button
-          bg="brand.primary"
-          color="white"
-          borderRadius="full"
-          h="56px"
-          w="full"
-          fontFamily="display"
-          fontWeight="700"
-          fontSize="17px"
-          disabled={!selectedId || isPurchasing}
-          _hover={{
-            transform: selectedId ? "translateY(-2px)" : undefined,
-            boxShadow: selectedId
-              ? "0 12px 32px rgba(236,72,153,0.45)"
-              : undefined,
-          }}
-          _active={{ transform: "translateY(0)" }}
-          _disabled={{ opacity: 0.5, cursor: "not-allowed" }}
-          transition="all 0.2s"
-          onClick={handlePurchase}
-        >
-          {isPurchasing ? (
-            <Box display="flex" alignItems="center" gap={2}>
-              <Spinner size="sm" />
-              <Text>Redirecting to checkout…</Text>
-            </Box>
-          ) : (
-            "Get Instant Clarity"
-          )}
-        </Button>
-
-        <Box display="flex" justifyContent="center" gap={4} flexWrap="wrap">
-          {TRUST_BADGES.map((badge) => (
-            <Text
-              key={badge}
-              fontSize="10px"
-              color="fg.muted"
-              fontWeight="600"
-              letterSpacing="wide"
-            >
-              🔒 {badge}
-            </Text>
-          ))}
-        </Box>
-
-        <GrowthPlanPolicy />
       </VStack>
     </PageShell>
   );

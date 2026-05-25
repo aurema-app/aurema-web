@@ -15,6 +15,7 @@ import { SocialProofStep } from "@/funnel/steps/SocialProofStep";
 import { PeaceBreakerStep } from "@/funnel/steps/PeaceBreakerStep";
 import { OverthinkingStep } from "@/funnel/steps/OverthinkingStep";
 import { DigitalAnxietyStep } from "@/funnel/steps/DigitalAnxietyStep";
+import { IntuitionStep } from "@/funnel/steps/IntuitionStep";
 import { FriendGroupStep } from "@/funnel/steps/FriendGroupStep";
 import { ProjectionStep } from "@/funnel/steps/ProjectionStep";
 import { ReinforcementStep } from "@/funnel/steps/ReinforcementStep";
@@ -38,6 +39,7 @@ const STEP_COMPONENTS: Record<string, ComponentType> = {
   "peace-breaker": PeaceBreakerStep,
   overthinking: OverthinkingStep,
   "digital-anxiety": DigitalAnxietyStep,
+  intuition: IntuitionStep,
   "friend-group": FriendGroupStep,
   projection: ProjectionStep,
   reinforcement: ReinforcementStep,
