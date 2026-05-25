@@ -2,24 +2,17 @@
 
 import { useRef, useState } from "react";
 
-import { Box, Button, Text, Textarea, VStack, Wrap } from "@chakra-ui/react";
-import { motion } from "framer-motion";
+import Image from "next/image";
+import Link from "next/link";
+
+import { Box, Button, Text, Textarea, Wrap } from "@chakra-ui/react";
+import { motion, AnimatePresence } from "framer-motion";
 
 import { useFunnelAnswers } from "@/funnel/state/useFunnelAnswers";
 import { useFunnelNavigation } from "@/funnel/flow/useFunnelNavigation";
 import { track, EVENTS } from "@/funnel/analytics/track";
 
-import { LexiAvatar } from "@/funnel/components/lexi/LexiAvatar";
-
 const SURFACE = "#F6F2FF";
-
-const QUICK_CHIPS = [
-  "I'm just so overwhelmed with work right now",
-  "I really like you but I don't want to ruin what we have",
-  "I'm fresh out of a relationship, I need space",
-  "I'm not looking for anything serious but let's keep hanging out",
-];
-
 const MAX_IMAGES = 3;
 
 function readFileAsDataURL(file: File): Promise<string> {
@@ -34,54 +27,39 @@ function readFileAsDataURL(file: File): Promise<string> {
 export function EvidenceStep() {
   const [text, setText] = useState("");
   const [images, setImages] = useState<string[]>([]);
-  const [isChipSelected, setIsChipSelected] = useState(false);
+  const [showTextInput, setShowTextInput] = useState(false);
   const [loadingImages, setLoadingImages] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const { setAnswer } = useFunnelAnswers();
   const { goNext } = useFunnelNavigation();
 
-  const handleChip = (chip: string) => {
-    setText(chip);
-    setIsChipSelected(true);
-  };
-
-  const handleTextChange = (value: string) => {
-    setText(value);
-    setIsChipSelected(false);
-  };
-
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
     if (!files.length) return;
-
     setLoadingImages(true);
     try {
       const remaining = MAX_IMAGES - images.length;
-      const toProcess = files.slice(0, remaining);
-      const dataUrls = await Promise.all(toProcess.map(readFileAsDataURL));
+      const dataUrls = await Promise.all(
+        files.slice(0, remaining).map(readFileAsDataURL),
+      );
       setImages((prev) => [...prev, ...dataUrls]);
     } catch {
-      // Silently drop unreadable files
+      // silently drop unreadable files
     } finally {
       setLoadingImages(false);
-      // Reset so same file can be re-selected
       if (fileRef.current) fileRef.current.value = "";
     }
   };
 
-  const removeImage = (idx: number) => {
+  const removeImage = (idx: number) =>
     setImages((prev) => prev.filter((_, i) => i !== idx));
-  };
 
   const canSubmit = text.trim().length > 0 || images.length > 0;
 
   const handleSubmit = () => {
     if (!canSubmit) return;
-
-    const evidenceType =
-      images.length > 0 ? "screenshot" : isChipSelected ? "chip" : "text";
-
+    const evidenceType = images.length > 0 ? "screenshot" : "text";
     setAnswer("evidenceText", text.trim());
     setAnswer("evidenceImages", images.length > 0 ? images : undefined);
     setAnswer("evidenceType", evidenceType);
@@ -114,12 +92,15 @@ export function EvidenceStep() {
         bg={SURFACE}
         pt="max(24px, env(safe-area-inset-top))"
       >
+        {/* Scrollable content */}
         <Box
           flex="1"
           overflowY="auto"
           overflowX="hidden"
           minH={0}
-          px={5}
+          display="flex"
+          flexDirection="column"
+          px={6}
           pb={3}
           css={{
             WebkitOverflowScrolling: "touch",
@@ -127,242 +108,264 @@ export function EvidenceStep() {
             "&::-webkit-scrollbar": { display: "none" },
           }}
         >
-          <Box display="flex" flexDirection="column" gap={5}>
-            <Box textAlign="center">
-              <LexiAvatar mood="holding-out" size="md" />
+          {/* Logo */}
+          <Box
+            display="flex"
+            justifyContent="center"
+            pt={2}
+            mb={6}
+            flexShrink={0}
+          >
+            <Box position="relative" h="36px" w="88px">
+              <Image
+                src="/lexi/logo.png"
+                alt="Lexi"
+                fill
+                style={{ objectFit: "contain" }}
+                priority
+              />
             </Box>
+          </Box>
 
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4 }}
-            >
-              <Text
-                fontFamily="body"
-                fontSize={{ base: "2xl", md: "3xl" }}
-                fontWeight="900"
-                color="fg.default"
-                letterSpacing="-0.5px"
-              >
-                Drop the receipts.
-              </Text>
-              <Text
-                fontSize="sm"
-                color="fg.muted"
-                fontWeight="500"
-                mt={1}
-                lineHeight="1.6"
-              >
-                Give Lexi something real to read. Choose how you want to share
-                the vibe.
-              </Text>
-            </motion.div>
+          {/* Headline */}
+          <Text
+            fontFamily="body"
+            fontSize="24px"
+            fontWeight="800"
+            lineHeight="1.25"
+            letterSpacing="-0.3px"
+            color="fg.default"
+            textAlign="center"
+            mb={3}
+            flexShrink={0}
+          >
+            Drop the receipts.
+          </Text>
 
-            <VStack gap={4} align="stretch">
-              {/* Option 1 — Text paste */}
+          {/* Subtitle */}
+          <Text
+            fontSize="15px"
+            fontStyle="italic"
+            fontWeight="500"
+            color="fg.muted"
+            lineHeight="1.6"
+            textAlign="center"
+            mb={6}
+            flexShrink={0}
+          >
+            Give Lexi something real to read. Let&apos;s look at what they
+            actually said, not what you wish they meant.
+          </Text>
+
+          {/* Attach screenshot image — tappable */}
+          <Box
+            as="button"
+            w="full"
+            cursor={images.length >= MAX_IMAGES ? "default" : "pointer"}
+            onClick={() => {
+              if (images.length < MAX_IMAGES) fileRef.current?.click();
+            }}
+            flexShrink={0}
+            mb={1}
+            _active={{ transform: "scale(0.98)" }}
+            transition="transform 0.15s"
+            position="relative"
+          >
+            {loadingImages ? (
               <Box
-                bg="card.bg"
-                borderRadius="2xl"
-                border="1.5px solid"
-                borderColor={
-                  text.trim() && !isChipSelected
-                    ? "brand.primary"
-                    : "border.light"
-                }
-                overflow="hidden"
-                transition="border-color 0.15s"
+                border="2px dashed"
+                borderColor="brand.primary"
+                borderRadius="20px"
+                py={8}
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
               >
-                <Box px={4} pt={3} pb={1}>
-                  <Text
-                    fontSize="xs"
+                <Text fontSize="15px" color="fg.muted" fontWeight="600">
+                  Loading...
+                </Text>
+              </Box>
+            ) : (
+              <Image
+                src="/lexi/attach-screenshots.png"
+                alt="Tap to attach screenshot"
+                width={1014}
+                height={492}
+                sizes="(max-width: 430px) 100vw, 430px"
+                style={{
+                  width: "100%",
+                  height: "auto",
+                  display: "block",
+                  borderRadius: "20px",
+                  opacity: images.length >= MAX_IMAGES ? 0.5 : 1,
+                }}
+                priority
+              />
+            )}
+            {images.length >= MAX_IMAGES && (
+              <Box
+                position="absolute"
+                inset={0}
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                borderRadius="20px"
+                bg="rgba(246,242,255,0.7)"
+              >
+                <Text fontSize="14px" fontWeight="700" color="brand.primary">
+                  {MAX_IMAGES} images added ✓
+                </Text>
+              </Box>
+            )}
+          </Box>
+
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            multiple
+            style={{ display: "none" }}
+            onChange={handleImageUpload}
+          />
+
+          {/* Thumbnails */}
+          {images.length > 0 && (
+            <Wrap gap={2} mb={3} justify="center">
+              {images.map((url, idx) => (
+                <Box key={idx} position="relative" w="72px" h="72px">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={url}
+                    alt={`Screenshot ${idx + 1}`}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      borderRadius: "12px",
+                    }}
+                  />
+                  <Box
+                    as="button"
+                    position="absolute"
+                    top="-6px"
+                    right="-6px"
+                    w="20px"
+                    h="20px"
+                    borderRadius="full"
+                    bg="brand.primary"
+                    color="white"
+                    fontSize="10px"
                     fontWeight="800"
-                    color="brand.primary"
-                    letterSpacing="wider"
-                    textTransform="uppercase"
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    cursor="pointer"
+                    onClick={() => removeImage(idx)}
                   >
-                    Paste it in ✍️ — Recommended
-                  </Text>
+                    ✕
+                  </Box>
                 </Box>
+              ))}
+              {images.length < MAX_IMAGES && (
+                <Box
+                  as="button"
+                  w="72px"
+                  h="72px"
+                  borderRadius="12px"
+                  border="2px dashed"
+                  borderColor="brand.primary"
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                  cursor="pointer"
+                  onClick={() => fileRef.current?.click()}
+                  color="brand.primary"
+                  fontSize="24px"
+                >
+                  +
+                </Box>
+              )}
+            </Wrap>
+          )}
+
+          {/* "or paste a confusing text below" toggle */}
+          <Box
+            as="button"
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            gap={2}
+            py={2}
+            w="full"
+            onClick={() => setShowTextInput((v) => !v)}
+            flexShrink={0}
+          >
+            <Text
+              fontSize="15px"
+              fontWeight="800"
+              fontStyle="italic"
+              color="brand.primary"
+              textAlign="center"
+            >
+              or paste a confusing text below 👇
+            </Text>
+          </Box>
+
+          {/* Expandable text input */}
+          <AnimatePresence>
+            {showTextInput && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.25, ease: "easeOut" }}
+                style={{ overflow: "hidden", flexShrink: 0 }}
+              >
                 <Textarea
                   value={text}
-                  onChange={(e) => handleTextChange(e.target.value)}
-                  placeholder="Paste a confusing text, a recurring excuse they use, or just vent the situation here..."
-                  border="none"
+                  onChange={(e) => setText(e.target.value)}
+                  placeholder="Paste a confusing text, a recurring excuse, or just describe the situation..."
+                  border="1.5px solid"
+                  borderColor={text.trim() ? "brand.primary" : "lexi.border"}
+                  borderRadius="16px"
                   focusRingColor="transparent"
-                  _focus={{ boxShadow: "none" }}
+                  _focus={{ boxShadow: "none", borderColor: "brand.primary" }}
                   resize="none"
                   rows={4}
-                  fontSize="sm"
+                  fontSize="15px"
                   color="fg.default"
                   fontFamily="body"
                   fontWeight="500"
+                  bg="white"
                   px={4}
                   py={3}
+                  mt={2}
+                  mb={3}
+                  transition="border-color 0.15s"
                 />
-              </Box>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-              {/* Option 2 — Quick chips */}
-              <Box>
-                <Text
-                  fontSize="xs"
-                  fontWeight="800"
-                  color="fg.muted"
-                  letterSpacing="wider"
-                  textTransform="uppercase"
-                  mb={2}
-                >
-                  Classic Excuses — Zero Friction
-                </Text>
-                <Wrap gap={2}>
-                  {QUICK_CHIPS.map((chip) => (
-                    <Box
-                      key={chip}
-                      as="button"
-                      px={3}
-                      py={2}
-                      borderRadius="full"
-                      border="1.5px solid"
-                      borderColor={
-                        isChipSelected && text === chip
-                          ? "brand.primary"
-                          : "border.light"
-                      }
-                      bg={
-                        isChipSelected && text === chip
-                          ? "lexi.primaryLight"
-                          : "card.bg"
-                      }
-                      fontSize="xs"
-                      fontWeight="600"
-                      color="fg.default"
-                      cursor="pointer"
-                      textAlign="left"
-                      transition="all 0.15s"
-                      _hover={{
-                        borderColor: "brand.primary",
-                        bg: "lexi.primaryLight",
-                      }}
-                      _active={{ transform: "scale(0.97)" }}
-                      onClick={() => handleChip(chip)}
-                    >
-                      &ldquo;{chip}&rdquo;
-                    </Box>
-                  ))}
-                </Wrap>
-              </Box>
-
-              {/* Option 3 — Screenshot upload */}
-              <Box>
-                <Box
-                  as="button"
-                  border="2px dashed"
-                  borderColor={
-                    images.length > 0 ? "brand.primary" : "border.light"
-                  }
-                  borderRadius="2xl"
-                  p={4}
-                  textAlign="center"
-                  cursor={images.length >= MAX_IMAGES ? "default" : "pointer"}
-                  transition="all 0.18s"
-                  w="full"
-                  _hover={
-                    images.length < MAX_IMAGES
-                      ? {
-                          borderColor: "brand.secondary",
-                          bg: "lexi.lavenderLight",
-                        }
-                      : {}
-                  }
-                  onClick={() => {
-                    if (images.length < MAX_IMAGES) fileRef.current?.click();
-                  }}
-                >
-                  {loadingImages ? (
-                    <Text fontSize="sm" color="fg.muted" fontWeight="600">
-                      Loading...
-                    </Text>
-                  ) : (
-                    <>
-                      <Text fontSize="sm" color="fg.muted" fontWeight="600">
-                        📎{" "}
-                        {images.length === 0
-                          ? "Upload screenshots (JPEG/PNG)"
-                          : images.length >= MAX_IMAGES
-                            ? `${MAX_IMAGES} screenshots added`
-                            : `Add more screenshots (${images.length}/${MAX_IMAGES})`}
-                      </Text>
-                      {images.length === 0 && (
-                        <Text
-                          fontSize="xs"
-                          color="fg.muted"
-                          mt={1}
-                          opacity={0.7}
-                        >
-                          Tap to attach · up to {MAX_IMAGES} images
-                        </Text>
-                      )}
-                    </>
-                  )}
-                </Box>
-
-                {/* Thumbnails */}
-                {images.length > 0 && (
-                  <Wrap gap={2} mt={3}>
-                    {images.map((url, idx) => (
-                      <Box key={idx} position="relative" w="72px" h="72px">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={url}
-                          alt={`Screenshot ${idx + 1}`}
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "cover",
-                            borderRadius: "12px",
-                          }}
-                        />
-                        <Box
-                          as="button"
-                          position="absolute"
-                          top="-6px"
-                          right="-6px"
-                          w="20px"
-                          h="20px"
-                          borderRadius="full"
-                          bg="brand.primary"
-                          color="white"
-                          fontSize="10px"
-                          fontWeight="800"
-                          display="flex"
-                          alignItems="center"
-                          justifyContent="center"
-                          cursor="pointer"
-                          onClick={() => removeImage(idx)}
-                        >
-                          ✕
-                        </Box>
-                      </Box>
-                    ))}
-                  </Wrap>
-                )}
-
-                <input
-                  ref={fileRef}
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp"
-                  multiple
-                  style={{ display: "none" }}
-                  onChange={handleImageUpload}
-                />
-              </Box>
-            </VStack>
+          {/* Hero image anchored to bottom */}
+          <Box flex="1" display="flex" alignItems="flex-end" mt={2}>
+            <Image
+              src="/lexi/hero-4.png"
+              alt="Lexi"
+              width={716}
+              height={506}
+              sizes="100vw"
+              style={{ width: "100%", height: "auto", display: "block" }}
+              priority
+            />
           </Box>
         </Box>
 
+        {/* Pinned footer */}
         <Box
           flexShrink={0}
           w="full"
-          px={5}
+          px={6}
           pt={3}
           pb="max(16px, env(safe-area-inset-bottom))"
           bg={SURFACE}
@@ -392,8 +395,24 @@ export function EvidenceStep() {
             transition="all 0.18s ease"
             onClick={handleSubmit}
           >
-            Decode the Mess
+            Decode the Receipts
           </Button>
+
+          <Text
+            fontSize="11px"
+            fontWeight="500"
+            color="fg.muted"
+            textAlign="center"
+            mt={3}
+          >
+            <Link href="/terms" style={{ textDecoration: "underline" }}>
+              Terms of use
+            </Link>
+            {" · "}
+            <Link href="/privacy" style={{ textDecoration: "underline" }}>
+              Privacy policy
+            </Link>
+          </Text>
         </Box>
       </Box>
     </Box>
