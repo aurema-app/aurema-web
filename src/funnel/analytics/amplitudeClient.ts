@@ -16,6 +16,8 @@ export function initAmplitude(): void {
     return;
   }
 
+  const debug = process.env.NEXT_PUBLIC_AMPLITUDE_DEBUG === "true";
+
   amplitude.init(apiKey, {
     defaultTracking: {
       sessions: true,
@@ -27,10 +29,12 @@ export function initAmplitude(): void {
     // Flush queued events immediately so step_exit events aren't lost on navigation.
     flushIntervalMillis: 0,
     flushQueueSize: 1,
-    // Use Debug in dev so you can see every event in the browser console.
+    // Debug is extremely verbose (includes stacks). Gate behind env var.
     logLevel:
       process.env.NODE_ENV === "development"
-        ? amplitude.Types.LogLevel.Debug
+        ? debug
+          ? amplitude.Types.LogLevel.Debug
+          : amplitude.Types.LogLevel.Warn
         : amplitude.Types.LogLevel.None,
   });
 
