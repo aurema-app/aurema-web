@@ -1,0 +1,40 @@
+---
+description: High-level overview of the Aurema web funnel project, tech stack, and non-goals
+alwaysApply: true
+---
+
+# Aurema Web Funnel — Project Overview
+
+Aurema is a mindfulness / clarity app. This repository (`aurema-web`) hosts the marketing site and the **web growth-plan funnel** served at `aurema-app.com/growth-plan`.
+
+The funnel drives new users through a short series of personalization steps and ends at a paywall. After paying, the user continues into the mobile app.
+
+## Stack
+
+- **Next.js 15** (App Router), **React 19**, **TypeScript**
+- **Marketing pages**: Tailwind v4 + framer-motion (unchanged)
+- **Funnel pages (`src/app/(funnel)/growth-plan/*`)**: **Chakra UI** (scoped)
+- **Auth**: Firebase Auth (Google, Apple, email)
+- **Payments**: RevenueCat Web Billing via `@revenuecat/purchases-js` (Stripe under the hood)
+- **Analytics**: Amplitude (events + Amplitude Experiment for flags)
+- **Lead / email capture**: Firestore (`funnel_leads` collection in `aurema-backend`). No third-party ESP in MVP; export later if needed.
+- **Backend**: `aurema-backend` (Node/Express, Firebase Admin, existing RevenueCat webhook)
+
+## Non-goals (do NOT add these without explicit ask)
+
+- No monorepo / Turborepo split. Single Next app.
+- No SSR variant allocation; experiments are client-side flags only.
+- No direct Stripe SDK in our code — everything goes through RevenueCat.
+- No multiple paywalls. One paywall page.
+- No attribution / ad-platform integrations. Organic-first.
+- No new auth providers beyond Google, Apple, email.
+
+## Where things live
+
+- `src/app/(funnel)/growth-plan/**` — funnel routes
+- `src/funnel/**` — funnel domain code (steps, flow, state, components, services)
+- `docs/funnel/**` — masterplan, architecture, runbooks, PROGRESS
+- `.cursor/rules/**` — rules agents consume automatically
+- `.cursor/skills/**` — step-by-step recipes for common tasks
+
+Always read `docs/funnel/PROGRESS.md` first when starting work on the funnel.

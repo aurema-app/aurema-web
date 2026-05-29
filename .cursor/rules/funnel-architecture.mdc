@@ -1,0 +1,75 @@
+---
+description: Funnel architecture - step engine, state, flow definition
+globs: src/app/(funnel)/**,src/funnel/**
+alwaysApply: false
+---
+
+# Funnel Architecture
+
+The funnel is a linear sequence of **steps** rendered one at a time. State is held in React context and mirrored to `localStorage`.
+
+## Folder map
+
+```
+src/funnel/
+  components/        generic primitives (OptionText, ProgressBar, ContinueButton, ...)
+  steps/             one file per step component
+  flow/flow.ts       ordered list of steps + gating rules
+  state/             FunnelContext + types for answers
+  experiments/       Amplitude Experiment client + useVariant + flags
+  services/          revenueCatClient, firebaseClient, leadsClient, funnelApi
+  analytics/track.ts typed Amplitude events
+  theme/             Chakra theme tokens for the funnel
+```
+
+## Step pattern
+
+Every step is a self-contained component that:
+
+1. Reads answers from `useFunnelAnswers()`.
+2. Renders question + options using primitives in `components/`.
+3. Calls `setAnswer(stepId, value)` when the user picks an option.
+4. Calls `goNext()` from `useFunnelNavigation()` to advance.
+
+```tsx
+export const GoalStep = () => {
+  const { answer, setAnswer } = useFunnelAnswers<'goal'>('goal')
+  const { goNext } = useFunnelNavigation()
+  return (
+    <StepShell title="What brings you to Aurema?">
+      <OptionText selected={answer === 'clarity'} onClick={() => { setAnswer('goal', 'clarity'); goNext() }}>Clarity</OptionText>
+      ...
+    </StepShell>
+  )
+}
+```
+
+## Flow engine
+
+`src/funnel/flow/flow.ts` exports an ordered array of step descriptors:
+
+```ts
+export const flow: FunnelStep[] = [
+  { id: 'goal',     component: GoalStep },
+  { id: 'age',      component: AgeStep },
+  { id: 'generating', component: GeneratingPlanStep },
+  { id: 'email',    component: EmailStep, when: (a) => !a.userEmail },
+  { id: 'sign-in',  component: SignInStep, when: (a) => !a.firebaseUid },
+  { id: 'paywall',  component: PaywallStep },
+]
+```
+
+`useFunnelNavigation()` computes the next/prev step based on current route + `when` predicates.
+
+## State
+
+- `FunnelAnswers` is a typed record. Add new keys to the type when you add a step that captures data.
+- Persist to `localStorage` under key `aurema.funnel.answers.v1`. Bump the version (`.v2`) if you change the shape in a breaking way.
+- Never store PII that is not strictly needed (we keep `email`, `firebaseUid`, and answers; no payment info — RC/Stripe handle that).
+
+## When to add a new step vs. a variant
+
+- **New step**: the funnel needs a new question or screen for everyone.
+- **Variant**: you want to A/B a specific existing step. Use `useVariant()` — see `experiments.mdc`.
+
+Do not conditionally render N versions of a step inside one file without going through `useVariant` — it breaks analytics.

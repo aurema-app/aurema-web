@@ -1,0 +1,25 @@
+---
+description: Chakra UI is scoped to the funnel route group only - marketing stays Tailwind
+alwaysApply: false
+---
+
+# Chakra Usage
+
+Chakra UI is **only** enabled inside `src/app/(funnel)/growth-plan/**` via a provider in that route group's `layout.tsx`. The marketing app at `/`, `/privacy`, `/terms`, etc. continues to use Tailwind v4 + framer-motion exclusively.
+
+## Rules
+
+- Do **not** import Chakra components in files under `src/app/(marketing)/**` or at the root layout level.
+- Do **not** import Tailwind utility classes inside funnel components. Use Chakra's style props / theme tokens.
+- Shared fonts (Quicksand, Cormorant Garamond) are already loaded on `<body>` by the root layout. Expose them to Chakra via theme tokens instead of re-importing `next/font`.
+- Chakra version: check `docs/funnel/01-architecture.md` — we pin v3 for React 19 compatibility. Do not downgrade without coordination.
+
+## Theme
+
+- Theme lives at `src/funnel/theme/chakraTheme.ts`.
+- Use semantic color tokens (e.g. `bg.subtle`, `fg.default`, `brand.primary`) rather than hex values in components.
+
+## Responsive
+
+- Mobile-first. Default style props target mobile; use `{ base: '...', md: '...' }` for larger breakpoints.
+- Max content width on funnel steps: `sm` (~640px). Center with `mx="auto"`.
