@@ -1,11 +1,4 @@
-import type { Metadata } from "next";
-
 import { FunnelProviders } from "./providers";
-
-export const metadata: Metadata = {
-  title: "Lexi — Your situationship read",
-};
-
 export default function GrowthPlanLayout({
   children,
 }: {
