@@ -28,7 +28,6 @@ import { TeaserStep } from "@/funnel/steps/TeaserStep";
 
 // Auth + paywall steps
 import { EmailStep } from "@/funnel/steps/EmailStep";
-import { SignInStep } from "@/funnel/steps/SignInStep";
 import { PaywallStep } from "@/funnel/steps/PaywallStep";
 
 const STEP_COMPONENTS: Record<string, ComponentType> = {
@@ -49,7 +48,6 @@ const STEP_COMPONENTS: Record<string, ComponentType> = {
   analyzing: AnalyzingStep,
   teaser: TeaserStep,
   email: EmailStep,
-  "sign-in": SignInStep,
   paywall: PaywallStep,
 };
 

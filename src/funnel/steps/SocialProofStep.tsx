@@ -1,11 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 
 import { Box, Button, Text, VStack } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 
+import { LegalFooterLinks } from "@/funnel/components/LegalFooterLinks";
 import { useFunnelNavigation } from "@/funnel/flow/useFunnelNavigation";
 import { track, EVENTS } from "@/funnel/analytics/track";
 import { TestimonialCard } from "@/funnel/components/lexi/TestimonialCard";
@@ -215,21 +215,7 @@ export function SocialProofStep() {
             See where you stand
           </Button>
 
-          <Text
-            fontSize="11px"
-            fontWeight="500"
-            color="fg.muted"
-            textAlign="center"
-            mt={3}
-          >
-            <Link href="/terms" style={{ textDecoration: "underline" }}>
-              Terms of use
-            </Link>
-            {" · "}
-            <Link href="/privacy" style={{ textDecoration: "underline" }}>
-              Privacy policy
-            </Link>
-          </Text>
+          <LegalFooterLinks mt={3} />
         </Box>
       </Box>
     </Box>

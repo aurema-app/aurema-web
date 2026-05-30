@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Account Deletion | Aurema",
+  title: "Account Deletion",
   description:
     "Request account and data deletion for your Aurema account.",
 };

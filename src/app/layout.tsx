@@ -5,6 +5,9 @@ import {
   Poppins,
   Quicksand,
 } from "next/font/google";
+
+import { SITE_TITLE } from "@/constants/site";
+
 import "./globals.css";
 
 const quicksand = Quicksand({
@@ -35,18 +38,21 @@ const lexiScript = Caveat({
 });
 
 export const metadata: Metadata = {
-  title: "Aurema - Where thoughts meet clarity",
+  title: {
+    default: SITE_TITLE,
+    template: `%s | ${SITE_TITLE}`,
+  },
   description: "We're almost ready. Get notified when Aurema goes live.",
   keywords: ["Aurema", "clarity", "thoughts", "coming soon", "mindfulness"],
   authors: [{ name: "Aurema" }],
   openGraph: {
-    title: "Aurema - Where thoughts meet clarity",
+    title: SITE_TITLE,
     description: "We're almost ready. Get notified when Aurema goes live.",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Aurema - Where thoughts meet clarity",
+    title: SITE_TITLE,
     description: "We're almost ready. Get notified when Aurema goes live.",
   },
 };

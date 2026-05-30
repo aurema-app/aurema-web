@@ -4,10 +4,10 @@ import { useState } from "react";
 
 import Image from "next/image";
 
-import { Box, Button, IconButton, Input, Text, VStack } from "@chakra-ui/react";
+import { Box, Button, Input, Text, VStack } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 
-import { ProgressBar } from "@/funnel/components/ProgressBar";
+import { LegalFooterLinks } from "@/funnel/components/LegalFooterLinks";
 
 const SURFACE = "#F6F2FF";
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -18,38 +18,14 @@ const fadeUp = (delay = 0) => ({
   transition: { duration: 0.38, delay, ease: "easeOut" as const },
 });
 
-const BackIcon = () => (
-  <svg
-    width="20"
-    height="20"
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-      d="M15 18l-6-6 6-6"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
-
 type LexiEmailCaptureProps = {
   initialEmail?: string;
   onContinue: (email: string) => void;
-  onBack?: () => void;
-  showBack?: boolean;
-  showProgress?: boolean;
 };
 
 export function LexiEmailCapture({
   initialEmail = "",
   onContinue,
-  onBack,
-  showBack = false,
-  showProgress = true,
 }: LexiEmailCaptureProps) {
   const [value, setValue] = useState(initialEmail);
   const [touched, setTouched] = useState(false);
@@ -100,23 +76,6 @@ export function LexiEmailCapture({
           }}
         >
           <Box position="relative" mb={4}>
-            {showBack && onBack && (
-              <IconButton
-                aria-label="Go back"
-                variant="ghost"
-                color="fg.muted"
-                size="sm"
-                position="absolute"
-                left={0}
-                top="50%"
-                transform="translateY(-50%)"
-                onClick={onBack}
-                _hover={{ bg: "transparent", color: "fg.default" }}
-              >
-                <BackIcon />
-              </IconButton>
-            )}
-
             <Box mx="auto" position="relative" h="36px" w="88px">
               <Image
                 src="/lexi/logo.png"
@@ -127,12 +86,6 @@ export function LexiEmailCapture({
               />
             </Box>
           </Box>
-
-          {showProgress && (
-            <Box mb={8}>
-              <ProgressBar />
-            </Box>
-          )}
 
           <VStack align="stretch" gap={8} w="full">
             <motion.div {...fadeUp(0.06)}>
@@ -235,6 +188,8 @@ export function LexiEmailCapture({
           >
             Continue
           </Button>
+
+          <LegalFooterLinks mt={3} />
         </Box>
       </Box>
     </Box>

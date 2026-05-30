@@ -28,7 +28,6 @@ export type FunnelAnswers = {
   lexiTeaserCopy?: string;
   lexiPaywallHook?: string;
 
-  // Lead + auth
+  // Lead capture (localStorage only)
   userEmail?: string;
-  firebaseUid?: string;
 };

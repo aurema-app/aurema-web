@@ -43,8 +43,8 @@ function AmplitudeBootstrap() {
 
   // Keep user identity and answer-based user properties in sync.
   useEffect(() => {
-    if (answers.firebaseUid) {
-      setAmplitudeUserId(answers.firebaseUid);
+    if (answers.userEmail) {
+      setAmplitudeUserId(answers.userEmail);
     }
 
     // Mirror all Lexi funnel answers as user properties so every subsequent
@@ -63,7 +63,6 @@ function AmplitudeBootstrap() {
     if (answers.evidenceType) props.evidence_type = answers.evidenceType;
     if (answers.lexiPattern) props.detected_pattern = answers.lexiPattern;
     if (answers.userEmail) props.email_captured = "true";
-    if (answers.firebaseUid) props.signed_in = "true";
 
     if (Object.keys(props).length) setAmplitudeUserProperties(props);
   }, [answers]);

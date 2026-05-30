@@ -31,9 +31,8 @@ type PageState =
   | { kind: "no-offerings" }
   | { kind: "error"; message: string };
 
-function useDummyPaywall(firebaseUid: string | undefined): boolean {
-  if (!isRevenueCatEnabled()) return true;
-  return Boolean(firebaseUid?.startsWith("email:"));
+function useDummyPaywall(): boolean {
+  return !isRevenueCatEnabled();
 }
 
 function packageToPlan(pkg: Package, index: number): PaywallPlan {
@@ -215,19 +214,11 @@ function PlanCard({
             </Box>
           </Box>
           {plan.originalPrice && (
-            <Text
-              fontSize="12px"
-              color="fg.muted"
-              mt={1}
-              textDecoration="line-through"
-            >
-              {plan.originalPrice}{" "}
-              <Text
-                as="span"
-                textDecoration="none"
-                color="fg.default"
-                fontWeight="600"
-              >
+            <Text fontSize="12px" color="fg.muted" mt={1}>
+              <Text as="span" textDecoration="line-through">
+                {plan.originalPrice}
+              </Text>{" "}
+              <Text as="span" color="fg.default" fontWeight="600">
                 {plan.price}
               </Text>
             </Text>
@@ -235,19 +226,33 @@ function PlanCard({
         </Box>
 
         {/* Right: per-day price */}
-        <Box textAlign="right" flexShrink={0}>
-          <Text fontSize="13px" color="fg.muted" fontWeight="500">
-            $
-          </Text>
-          <Text
-            fontFamily="body"
-            fontSize={plan.isMostPopular ? "48px" : "36px"}
-            fontWeight="900"
-            color="fg.default"
-            lineHeight="1"
-          >
-            {plan.perDay.replace("$0.", "0.").replace("$1.", "1.")}
-          </Text>
+        <Box
+          flexShrink={0}
+          display="flex"
+          flexDirection="column"
+          alignItems="flex-end"
+        >
+          <Box display="flex" alignItems="baseline" justifyContent="flex-end">
+            <Text
+              fontFamily="body"
+              fontSize={plan.isMostPopular ? "28px" : "22px"}
+              fontWeight="900"
+              color="fg.default"
+              lineHeight="1"
+              mr="1px"
+            >
+              $
+            </Text>
+            <Text
+              fontFamily="body"
+              fontSize={plan.isMostPopular ? "48px" : "36px"}
+              fontWeight="900"
+              color="fg.default"
+              lineHeight="1"
+            >
+              {plan.perDay.replace(/^\$/, "")}
+            </Text>
+          </Box>
           <Text
             fontSize="10px"
             color="fg.muted"
@@ -273,10 +278,10 @@ export default function PaywallPage() {
   const [purchaseError, setPurchaseError] = useState<string | null>(null);
   const [isPurchasing, setIsPurchasing] = useState(false);
 
-  const dummyMode = useDummyPaywall(answers.firebaseUid);
+  const dummyMode = useDummyPaywall();
 
   useEffect(() => {
-    if (!answers.firebaseUid) {
+    if (!answers.userEmail) {
       router.replace("/growth-plan/email");
       return;
     }
@@ -294,7 +299,7 @@ export default function PaywallPage() {
       return;
     }
 
-    configureRevenueCat(answers.firebaseUid);
+    configureRevenueCat(answers.userEmail);
     let cancelled = false;
 
     const load = async () => {
@@ -338,7 +343,7 @@ export default function PaywallPage() {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [answers.firebaseUid, dummyMode]);
+  }, [answers.userEmail, dummyMode]);
 
   const handleDummyPurchase = async () => {
     const plan =
