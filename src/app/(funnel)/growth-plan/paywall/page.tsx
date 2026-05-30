@@ -215,19 +215,11 @@ function PlanCard({
             </Box>
           </Box>
           {plan.originalPrice && (
-            <Text
-              fontSize="12px"
-              color="fg.muted"
-              mt={1}
-              textDecoration="line-through"
-            >
-              {plan.originalPrice}{" "}
-              <Text
-                as="span"
-                textDecoration="none"
-                color="fg.default"
-                fontWeight="600"
-              >
+            <Text fontSize="12px" color="fg.muted" mt={1}>
+              <Text as="span" textDecoration="line-through">
+                {plan.originalPrice}
+              </Text>{" "}
+              <Text as="span" color="fg.default" fontWeight="600">
                 {plan.price}
               </Text>
             </Text>
@@ -235,19 +227,33 @@ function PlanCard({
         </Box>
 
         {/* Right: per-day price */}
-        <Box textAlign="right" flexShrink={0}>
-          <Text fontSize="13px" color="fg.muted" fontWeight="500">
-            $
-          </Text>
-          <Text
-            fontFamily="body"
-            fontSize={plan.isMostPopular ? "48px" : "36px"}
-            fontWeight="900"
-            color="fg.default"
-            lineHeight="1"
-          >
-            {plan.perDay.replace("$0.", "0.").replace("$1.", "1.")}
-          </Text>
+        <Box
+          flexShrink={0}
+          display="flex"
+          flexDirection="column"
+          alignItems="flex-end"
+        >
+          <Box display="flex" alignItems="baseline" justifyContent="flex-end">
+            <Text
+              fontFamily="body"
+              fontSize={plan.isMostPopular ? "28px" : "22px"}
+              fontWeight="900"
+              color="fg.default"
+              lineHeight="1"
+              mr="1px"
+            >
+              $
+            </Text>
+            <Text
+              fontFamily="body"
+              fontSize={plan.isMostPopular ? "48px" : "36px"}
+              fontWeight="900"
+              color="fg.default"
+              lineHeight="1"
+            >
+              {plan.perDay.replace(/^\$/, "")}
+            </Text>
+          </Box>
           <Text
             fontSize="10px"
             color="fg.muted"
