@@ -8,7 +8,7 @@ import { useFunnelAnswers } from "@/funnel/state/useFunnelAnswers";
 
 export function EmailStep() {
   const { answers, setAnswer } = useFunnelAnswers();
-  const { goNext, goPrev, currentIndex } = useFunnelNavigation();
+  const { goNext } = useFunnelNavigation();
 
   const handleContinue = (email: string) => {
     setAnswer("userEmail", email);
@@ -21,8 +21,6 @@ export function EmailStep() {
     <LexiEmailCapture
       initialEmail={answers.userEmail ?? ""}
       onContinue={handleContinue}
-      showBack={currentIndex > 0}
-      onBack={goPrev}
     />
   );
 }
