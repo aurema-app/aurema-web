@@ -13,11 +13,17 @@ export function LegalFooterLinks(props: TextProps) {
       textAlign="center"
       {...props}
     >
-      <Link href="/terms" style={{ textDecoration: "underline" }}>
+      <Link
+        href="/terms"
+        style={{ color: "#746476" }}
+      >
         Terms of use
       </Link>
       {" · "}
-      <Link href="/privacy" style={{ textDecoration: "underline" }}>
+      <Link
+        href="/privacy"
+        style={{ color: "#746476" }}
+      >
         Privacy policy
       </Link>
     </Text>
