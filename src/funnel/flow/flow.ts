@@ -24,8 +24,6 @@ export const flow: FunnelStep[] = [
   { id: "evidence" },
   { id: "analyzing" },
   { id: "teaser" },
-  { id: "email", when: (a) => !a.userEmail || !a.firebaseUid },
-  // Sign-in hidden until Lexi auth UI is wired; email step sets a local uid stub.
-  { id: "sign-in", when: () => false },
-  { id: "paywall" }, // Screen 13 — Paywall (redirects to /growth-plan/paywall)
+  { id: "email", when: (a) => !a.userEmail },
+  { id: "paywall" }, // Redirects to /growth-plan/paywall
 ];

@@ -31,9 +31,8 @@ type PageState =
   | { kind: "no-offerings" }
   | { kind: "error"; message: string };
 
-function useDummyPaywall(firebaseUid: string | undefined): boolean {
-  if (!isRevenueCatEnabled()) return true;
-  return Boolean(firebaseUid?.startsWith("email:"));
+function useDummyPaywall(): boolean {
+  return !isRevenueCatEnabled();
 }
 
 function packageToPlan(pkg: Package, index: number): PaywallPlan {
@@ -279,10 +278,10 @@ export default function PaywallPage() {
   const [purchaseError, setPurchaseError] = useState<string | null>(null);
   const [isPurchasing, setIsPurchasing] = useState(false);
 
-  const dummyMode = useDummyPaywall(answers.firebaseUid);
+  const dummyMode = useDummyPaywall();
 
   useEffect(() => {
-    if (!answers.firebaseUid) {
+    if (!answers.userEmail) {
       router.replace("/growth-plan/email");
       return;
     }
@@ -300,7 +299,7 @@ export default function PaywallPage() {
       return;
     }
 
-    configureRevenueCat(answers.firebaseUid);
+    configureRevenueCat(answers.userEmail);
     let cancelled = false;
 
     const load = async () => {
@@ -344,7 +343,7 @@ export default function PaywallPage() {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [answers.firebaseUid, dummyMode]);
+  }, [answers.userEmail, dummyMode]);
 
   const handleDummyPurchase = async () => {
     const plan =
