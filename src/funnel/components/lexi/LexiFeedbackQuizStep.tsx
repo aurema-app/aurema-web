@@ -104,64 +104,72 @@ export function LexiFeedbackQuizStep({
             "&::-webkit-scrollbar": { display: "none" },
           }}
         >
-          <VStack w="full" align="center" gap={0} pt={2}>
-            <motion.div {...fadeUp(0)}>
-              <Box position="relative" h="36px" w="88px">
-                <Image
-                  src="/lexi/logo.png"
-                  alt="Lexi"
-                  fill
-                  style={{ objectFit: "contain" }}
-                  priority
-                />
-              </Box>
-            </motion.div>
+          <Box minH="100%" display="flex" flexDirection="column">
+            <VStack w="full" align="center" gap={0} pt={2} flexShrink={0}>
+              <motion.div {...fadeUp(0)}>
+                <Box position="relative" h="36px" w="88px">
+                  <Image
+                    src="/lexi/logo.png"
+                    alt="Lexi"
+                    fill
+                    style={{ objectFit: "contain" }}
+                    priority
+                  />
+                </Box>
+              </motion.div>
 
-            <motion.div
-              {...fadeUp(0.08)}
-              style={{ width: "100%", marginTop: "20px" }}
-            >
-              <Text
-                fontFamily="body"
-                fontSize="24px"
-                fontWeight="800"
-                lineHeight="1.2"
-                letterSpacing="-0.3px"
-                color="fg.default"
-                textAlign="center"
+              <motion.div
+                {...fadeUp(0.08)}
+                style={{ width: "100%", marginTop: "20px" }}
               >
-                {question}
-              </Text>
-            </motion.div>
-          </VStack>
-
-          <motion.div
-            {...fadeUp(0.14)}
-            style={{ width: "100%", marginTop: "20px" }}
-          >
-            <VStack gap={2.5} w="full" align="stretch">
-              {options.map((opt) => (
-                <QuizOptionButton
-                  key={opt.id}
-                  emoji={opt.emoji}
-                  label={opt.label}
-                  selected={selected === opt.id}
-                  onClick={() => handleSelect(opt.id)}
-                />
-              ))}
+                <Text
+                  fontFamily="body"
+                  fontSize="24px"
+                  fontWeight="800"
+                  lineHeight="1.2"
+                  letterSpacing="-0.3px"
+                  color="fg.default"
+                  textAlign="center"
+                >
+                  {question}
+                </Text>
+              </motion.div>
             </VStack>
 
-            {selectedOption && (
-              <motion.div
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-                style={{ width: "100%" }}
-              >
-                <LexiSaysCard text={selectedOption.feedback} />
+            {/* Center options vertically in available space */}
+            <Box
+              flex="1"
+              display="flex"
+              flexDirection="column"
+              justifyContent="center"
+              pt={5}
+            >
+              <motion.div {...fadeUp(0.14)} style={{ width: "100%" }}>
+                <VStack gap={2.5} w="full" align="stretch">
+                  {options.map((opt) => (
+                    <QuizOptionButton
+                      key={opt.id}
+                      emoji={opt.emoji}
+                      label={opt.label}
+                      selected={selected === opt.id}
+                      onClick={() => handleSelect(opt.id)}
+                    />
+                  ))}
+                </VStack>
+
+                {selectedOption && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                    style={{ width: "100%", marginTop: "16px" }}
+                  >
+                    <LexiSaysCard text={selectedOption.feedback} />
+                  </motion.div>
+                )}
               </motion.div>
-            )}
-          </motion.div>
+            </Box>
+          </Box>
         </Box>
 
         {/* Pinned CTA + footer */}

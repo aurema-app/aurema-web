@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 
-import { Box, Button, Text, VStack } from "@chakra-ui/react";
+import { Box, Button, Text } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 
 import { LegalFooterLinks } from "@/funnel/components/LegalFooterLinks";
@@ -33,17 +33,28 @@ export function IntuitionStep() {
       bg={SURFACE}
       display="flex"
       flexDirection="column"
+      alignItems="center"
       overflow="hidden"
     >
-      <Box flex="1" display="flex" flexDirection="column" minH={0} w="full">
-        <VStack
-          gap={4}
-          w="full"
-          flexShrink={0}
-          px={5}
-          pt="max(24px, env(safe-area-inset-top))"
-        >
-          <motion.div {...fadeUp(0)}>
+      <Box
+        w="full"
+        maxW="430px"
+        h="full"
+        display="flex"
+        flexDirection="column"
+        bg={SURFACE}
+        pt="max(24px, env(safe-area-inset-top))"
+      >
+        {/* Text area */}
+        <Box flexShrink={0} px={5} pt={2} pb={4}>
+          <motion.div
+            {...fadeUp(0)}
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              marginBottom: "20px",
+            }}
+          >
             <Box position="relative" h="36px" w="88px">
               <Image
                 src="/lexi/logo.png"
@@ -58,12 +69,13 @@ export function IntuitionStep() {
           <motion.div {...fadeUp(0.06)} style={{ width: "100%" }}>
             <Text
               fontFamily="body"
-              fontSize={{ base: "26px", sm: "28px" }}
+              fontSize="26px"
               fontWeight="800"
               lineHeight="1.2"
               letterSpacing="-0.4px"
               color="fg.default"
               textAlign="center"
+              mb={3}
             >
               Your intuition isn&apos;t{" "}
               <Text as="span" color="brand.primary">
@@ -88,74 +100,70 @@ export function IntuitionStep() {
               you&apos;re holding onto.
             </Text>
           </motion.div>
-        </VStack>
+        </Box>
 
-        {/* Hero — full width, anchored to bottom above CTA */}
+        {/* Hero — fills remaining space, anchored to bottom */}
         <motion.div
           {...fadeUp(0.16)}
           style={{
             flex: 1,
             display: "flex",
             alignItems: "flex-end",
-            width: "100vw",
-            maxWidth: "100vw",
-            marginLeft: "calc(50% - 50vw)",
-            marginRight: "calc(50% - 50vw)",
             minHeight: 0,
+            overflow: "hidden",
           }}
         >
-          <Box w="full" display="flex" alignItems="flex-end">
-            <Image
-              src="/lexi/hero-2.png"
-              alt="Lexi — Truth hurts. Lexi helps."
-              width={777}
-              height={878}
-              sizes="100vw"
-              style={{
-                width: "100%",
-                height: "auto",
-                display: "block",
-                verticalAlign: "bottom",
-              }}
-              priority
-            />
-          </Box>
+          <Image
+            src="/lexi/hero-2.png"
+            alt="Lexi character"
+            width={777}
+            height={878}
+            sizes="(max-width: 430px) 100vw, 430px"
+            style={{
+              width: "100%",
+              height: "auto",
+              display: "block",
+              maxHeight: "100%",
+              objectFit: "contain",
+              objectPosition: "bottom",
+            }}
+            priority
+          />
         </motion.div>
-      </Box>
 
-      <Box
-        flexShrink={0}
-        w="full"
-        maxW="430px"
-        mx="auto"
-        px={5}
-        pt={3}
-        pb="max(16px, env(safe-area-inset-bottom))"
-        bg={SURFACE}
-        borderTop="1px solid"
-        borderColor="lexi.border"
-      >
-        <Button
-          bg="brand.primary"
-          color="white"
-          borderRadius="full"
-          h="56px"
+        {/* Pinned CTA */}
+        <Box
+          flexShrink={0}
           w="full"
-          fontFamily="display"
-          fontWeight="700"
-          fontSize="17px"
-          _hover={{
-            transform: "translateY(-2px)",
-            boxShadow: "0 12px 32px rgba(236,72,153,0.38)",
-          }}
-          _active={{ transform: "translateY(0)" }}
-          transition="all 0.18s ease"
-          onClick={handleContinue}
+          px={5}
+          pt={3}
+          pb="max(16px, env(safe-area-inset-bottom))"
+          bg={SURFACE}
+          borderTop="1px solid"
+          borderColor="lexi.border"
         >
-          Continue
-        </Button>
+          <Button
+            bg="brand.primary"
+            color="white"
+            borderRadius="full"
+            h="56px"
+            w="full"
+            fontFamily="display"
+            fontWeight="700"
+            fontSize="17px"
+            _hover={{
+              transform: "translateY(-2px)",
+              boxShadow: "0 12px 32px rgba(236,72,153,0.38)",
+            }}
+            _active={{ transform: "translateY(0)" }}
+            transition="all 0.18s ease"
+            onClick={handleContinue}
+          >
+            Continue
+          </Button>
 
-        <LegalFooterLinks mt={3} />
+          <LegalFooterLinks mt={3} />
+        </Box>
       </Box>
     </Box>
   );
