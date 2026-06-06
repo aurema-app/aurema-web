@@ -296,7 +296,7 @@ export function AnalyzingStep() {
           </Box>
         </LexiStepScroll>
 
-        <LexiCtaFooter px={6} showBorder={false} />
+        <LexiCtaFooter px={6} />
       </Box>
     </Box>
   );

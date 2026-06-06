@@ -513,7 +513,7 @@ export default function PaywallPage() {
   const selectedPlan = plans.find((p) => p.id === selectedId);
 
   const footer = (
-    <LexiCtaFooter showLegalLinks={false} showBorder={false}>
+    <LexiCtaFooter showLegalLinks={false}>
       {purchaseError && (
         <Text
           fontSize="sm"

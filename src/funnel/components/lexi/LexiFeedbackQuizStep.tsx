@@ -155,7 +155,6 @@ export function LexiFeedbackQuizStep({
 
         <LexiCtaFooter
           px={4}
-          showBorder={Boolean(selected)}
           legalLinksMt={selected ? 3 : 0}
         >
           {selected && (

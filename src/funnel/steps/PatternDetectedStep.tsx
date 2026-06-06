@@ -284,7 +284,6 @@ export function PatternDetectedStep() {
 
         <LexiCtaFooter
           px={6}
-          showBorder={revealed}
           legalLinksMt={revealed ? 3 : 0}
         >
           <AnimatePresence>
