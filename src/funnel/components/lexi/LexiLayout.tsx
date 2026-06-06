@@ -2,32 +2,39 @@
 
 import { Box } from "@chakra-ui/react";
 
+import { LexiStepScroll } from "@/funnel/components/lexi/LexiStepScroll";
 import { FUNNEL_STEP_TOP_PADDING } from "@/funnel/theme/layout.constants";
 
+type LexiLayoutProps = {
+  children: React.ReactNode;
+  footer?: React.ReactNode;
+};
+
 /**
- * Shared page wrapper for all Lexi funnel screens.
- * Light lavender-white background, single-column centered layout.
+ * Shared page wrapper for Lexi funnel screens — scrollable body, optional pinned footer.
  */
-export function LexiLayout({ children }: { children: React.ReactNode }) {
+export function LexiLayout({ children, footer }: LexiLayoutProps) {
   return (
     <Box
-      minH="100dvh"
+      h="100dvh"
+      maxH="100dvh"
+      w="full"
       bg="bg.canvas"
       display="flex"
       flexDirection="column"
       alignItems="center"
+      overflow="hidden"
     >
       <Box
         w="full"
-        maxW="420px"
-        flex="1"
+        maxW="430px"
+        h="full"
         display="flex"
         flexDirection="column"
-        px={5}
         pt={FUNNEL_STEP_TOP_PADDING}
-        pb={10}
       >
-        {children}
+        <LexiStepScroll px={5}>{children}</LexiStepScroll>
+        {footer}
       </Box>
     </Box>
   );

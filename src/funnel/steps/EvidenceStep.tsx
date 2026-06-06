@@ -7,8 +7,9 @@ import Image from "next/image";
 import { Box, Button, Text, Textarea, Wrap } from "@chakra-ui/react";
 import { motion, AnimatePresence } from "framer-motion";
 
-import { LegalFooterLinks } from "@/funnel/components/LegalFooterLinks";
+import { LexiCtaFooter } from "@/funnel/components/lexi/LexiCtaFooter";
 import { LexiLogoBanner } from "@/funnel/components/lexi/LexiLogoBanner";
+import { LexiStepScroll } from "@/funnel/components/lexi/LexiStepScroll";
 import { useFunnelAnswers } from "@/funnel/state/useFunnelAnswers";
 import { useFunnelNavigation } from "@/funnel/flow/useFunnelNavigation";
 import { track, EVENTS } from "@/funnel/analytics/track";
@@ -94,22 +95,7 @@ export function EvidenceStep() {
         bg={SURFACE}
         pt={FUNNEL_STEP_TOP_PADDING}
       >
-        {/* Scrollable content */}
-        <Box
-          flex="1"
-          overflowY="auto"
-          overflowX="hidden"
-          minH={0}
-          display="flex"
-          flexDirection="column"
-          px={6}
-          pb={3}
-          css={{
-            WebkitOverflowScrolling: "touch",
-            scrollbarWidth: "none",
-            "&::-webkit-scrollbar": { display: "none" },
-          }}
-        >
+        <LexiStepScroll display="flex" flexDirection="column" px={6} pb={3}>
           {/* Logo */}
           <Box
             display="flex"
@@ -353,19 +339,9 @@ export function EvidenceStep() {
               priority
             />
           </Box>
-        </Box>
+        </LexiStepScroll>
 
-        {/* Pinned footer */}
-        <Box
-          flexShrink={0}
-          w="full"
-          px={6}
-          pt={3}
-          pb="max(16px, env(safe-area-inset-bottom))"
-          bg={SURFACE}
-          borderTop="1px solid"
-          borderColor="lexi.border"
-        >
+        <LexiCtaFooter px={6}>
           <Button
             bg={canSubmit ? "brand.primary" : "border.light"}
             color={canSubmit ? "white" : "fg.muted"}
@@ -391,9 +367,7 @@ export function EvidenceStep() {
           >
             Decode the Receipts
           </Button>
-
-          <LegalFooterLinks mt={3} />
-        </Box>
+        </LexiCtaFooter>
       </Box>
     </Box>
   );

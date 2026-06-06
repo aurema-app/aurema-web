@@ -5,8 +5,9 @@ import { useState } from "react";
 import { Box, Text, VStack } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 
-import { LegalFooterLinks } from "@/funnel/components/LegalFooterLinks";
+import { LexiCtaFooter } from "@/funnel/components/lexi/LexiCtaFooter";
 import { LexiLogoBanner } from "@/funnel/components/lexi/LexiLogoBanner";
+import { LexiStepScroll } from "@/funnel/components/lexi/LexiStepScroll";
 import { QuizOptionButton } from "@/funnel/components/lexi/QuizOptionButton";
 import { setAmplitudeUserProperties } from "@/funnel/analytics/amplitudeClient";
 import { EVENTS, track } from "@/funnel/analytics/track";
@@ -76,61 +77,52 @@ export function PeaceBreakerStep() {
         display="flex"
         flexDirection="column"
         bg={SURFACE}
-        px={4}
         pt={FUNNEL_STEP_TOP_PADDING}
-        pb="max(16px, env(safe-area-inset-bottom))"
       >
-        <VStack w="full" align="center" gap={0} flexShrink={0} pt={2}>
-          <motion.div {...fadeUp(0)}>
-            <LexiLogoBanner />
-          </motion.div>
+        <LexiStepScroll px={4} pb={3}>
+          <VStack w="full" align="center" gap={0} pt={2}>
+            <motion.div {...fadeUp(0)}>
+              <LexiLogoBanner />
+            </motion.div>
 
-          <motion.div
-            {...fadeUp(0.08)}
-            style={{ width: "100%", marginTop: "24px" }}
-          >
-            <Text
-              fontFamily="body"
-              fontSize="24px"
-              fontWeight="800"
-              lineHeight="1.2"
-              letterSpacing="-0.3px"
-              color="fg.default"
-              textAlign="center"
+            <motion.div
+              {...fadeUp(0.08)}
+              style={{ width: "100%", marginTop: "24px" }}
             >
-              What destroys your
-              <br />
-              peace faster?
-            </Text>
-          </motion.div>
-        </VStack>
+              <Text
+                fontFamily="body"
+                fontSize="24px"
+                fontWeight="800"
+                lineHeight="1.2"
+                letterSpacing="-0.3px"
+                color="fg.default"
+                textAlign="center"
+              >
+                What destroys your
+                <br />
+                peace faster?
+              </Text>
+            </motion.div>
+          </VStack>
 
-        {/* Options — vertically centered in remaining space */}
-        <Box
-          flex="1"
-          w="full"
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-          py={4}
-          minH={0}
-        >
-          <motion.div {...fadeUp(0.16)} style={{ width: "100%" }}>
-            <VStack gap={2.5} w="full" align="stretch">
-              {OPTIONS.map((opt) => (
-                <QuizOptionButton
-                  key={opt.id}
-                  emoji={opt.emoji}
-                  label={opt.label}
-                  selected={selected === opt.id}
-                  onClick={() => handleSelect(opt.id)}
-                />
-              ))}
-            </VStack>
-          </motion.div>
-        </Box>
+          <Box w="full" py={4}>
+            <motion.div {...fadeUp(0.16)} style={{ width: "100%" }}>
+              <VStack gap={2.5} w="full" align="stretch">
+                {OPTIONS.map((opt) => (
+                  <QuizOptionButton
+                    key={opt.id}
+                    emoji={opt.emoji}
+                    label={opt.label}
+                    selected={selected === opt.id}
+                    onClick={() => handleSelect(opt.id)}
+                  />
+                ))}
+              </VStack>
+            </motion.div>
+          </Box>
+        </LexiStepScroll>
 
-        <LegalFooterLinks flexShrink={0} />
+        <LexiCtaFooter px={4} />
       </Box>
     </Box>
   );

@@ -3,9 +3,10 @@
 import { Box, Text, VStack } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 
-import { LegalFooterLinks } from "@/funnel/components/LegalFooterLinks";
-import { LexiLogoBanner } from "@/funnel/components/lexi/LexiLogoBanner";
 import { LexiCtaButton } from "@/funnel/components/lexi/LexiCtaButton";
+import { LexiCtaFooter } from "@/funnel/components/lexi/LexiCtaFooter";
+import { LexiLogoBanner } from "@/funnel/components/lexi/LexiLogoBanner";
+import { LexiStepScroll } from "@/funnel/components/lexi/LexiStepScroll";
 import { useFunnelNavigation } from "@/funnel/flow/useFunnelNavigation";
 import { track, EVENTS } from "@/funnel/analytics/track";
 import { TestimonialCard } from "@/funnel/components/lexi/TestimonialCard";
@@ -68,19 +69,7 @@ export function SocialProofStep() {
         bg={SURFACE}
         pt={FUNNEL_STEP_TOP_PADDING}
       >
-        {/* Scrollable content */}
-        <Box
-          flex="1"
-          overflowY="auto"
-          overflowX="hidden"
-          px={4}
-          pb={3}
-          css={{
-            WebkitOverflowScrolling: "touch",
-            scrollbarWidth: "none",
-            "&::-webkit-scrollbar": { display: "none" },
-          }}
-        >
+        <LexiStepScroll px={4} pb={3}>
           <VStack gap={{ base: 3, sm: 4 }} w="full" align="center" pb={2}>
             <motion.div {...fadeUp(0)}>
               <LexiLogoBanner />
@@ -169,25 +158,13 @@ export function SocialProofStep() {
               ))}
             </VStack>
           </VStack>
-        </Box>
+        </LexiStepScroll>
 
-        {/* Pinned CTA + footer — always visible */}
-        <Box
-          flexShrink={0}
-          w="full"
-          px={4}
-          pt={3}
-          pb="max(16px, env(safe-area-inset-bottom))"
-          bg={SURFACE}
-          borderTop="1px solid"
-          borderColor="lexi.border"
-        >
+        <LexiCtaFooter px={4}>
           <LexiCtaButton h={{ base: "56px", sm: "60px" }} onClick={handleCta}>
             See where you stand
           </LexiCtaButton>
-
-          <LegalFooterLinks mt={3} />
-        </Box>
+        </LexiCtaFooter>
       </Box>
     </Box>
   );

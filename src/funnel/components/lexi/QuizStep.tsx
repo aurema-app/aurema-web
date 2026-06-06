@@ -12,6 +12,7 @@ import { setAmplitudeUserProperties } from "@/funnel/analytics/amplitudeClient";
 
 import { LexiLayout } from "./LexiLayout";
 import { LexiCtaButton } from "./LexiCtaButton";
+import { LexiCtaFooter } from "./LexiCtaFooter";
 import { LexiTopBar } from "./LexiTopBar";
 import { LexiAvatar } from "./LexiAvatar";
 import { PillButton } from "./PillButton";
@@ -89,10 +90,18 @@ export function QuizStep({
   };
 
   return (
-    <LexiLayout>
+    <LexiLayout
+      footer={
+        showFeedback ? (
+          <LexiCtaFooter showLegalLinks={false}>
+            <LexiCtaButton onClick={goNext}>{ctaLabel}</LexiCtaButton>
+          </LexiCtaFooter>
+        ) : undefined
+      }
+    >
       <LexiTopBar />
 
-      <Box flex="1" display="flex" flexDirection="column" gap={6}>
+      <Box display="flex" flexDirection="column" gap={6} pb={3}>
         <Box textAlign="center">
           <LexiAvatar mood={mood} size="md" />
         </Box>
@@ -121,12 +130,6 @@ export function QuizStep({
         </VStack>
 
         {showFeedback && feedbackText && <MicroFeedback text={feedbackText} />}
-
-        {showFeedback && (
-          <LexiCtaButton onClick={goNext} mt="auto">
-            {ctaLabel}
-          </LexiCtaButton>
-        )}
       </Box>
     </LexiLayout>
   );

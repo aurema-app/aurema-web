@@ -9,8 +9,10 @@ import { motion } from "framer-motion";
 
 import { setAmplitudeUserProperties } from "@/funnel/analytics/amplitudeClient";
 import { EVENTS, track } from "@/funnel/analytics/track";
-import { LexiLogoBanner } from "@/funnel/components/lexi/LexiLogoBanner";
 import { LexiCtaButton } from "@/funnel/components/lexi/LexiCtaButton";
+import { LexiCtaFooter } from "@/funnel/components/lexi/LexiCtaFooter";
+import { LexiLogoBanner } from "@/funnel/components/lexi/LexiLogoBanner";
+import { LexiStepScroll } from "@/funnel/components/lexi/LexiStepScroll";
 import { useFunnelContext } from "@/funnel/state/FunnelContext";
 import { FUNNEL_STEP_TOP_PADDING } from "@/funnel/theme/layout.constants";
 
@@ -133,19 +135,7 @@ function CheckoutPage() {
         bg={SURFACE}
         pt={FUNNEL_STEP_TOP_PADDING}
       >
-        <Box
-          flex="1"
-          overflowY="auto"
-          overflowX="hidden"
-          minH={0}
-          px={5}
-          pb={3}
-          css={{
-            WebkitOverflowScrolling: "touch",
-            scrollbarWidth: "none",
-            "&::-webkit-scrollbar": { display: "none" },
-          }}
-        >
+        <LexiStepScroll px={5} pb={3}>
           <Box display="flex" flexDirection="column" gap={6}>
             <LexiLogoBanner mx="auto" flexShrink={0} />
 
@@ -225,18 +215,9 @@ function CheckoutPage() {
               </VStack>
             </motion.div>
           </Box>
-        </Box>
+        </LexiStepScroll>
 
-        <Box
-          flexShrink={0}
-          w="full"
-          px={5}
-          pt={3}
-          pb="max(16px, env(safe-area-inset-bottom))"
-          bg={SURFACE}
-          borderTop="1px solid"
-          borderColor="lexi.border"
-        >
+        <LexiCtaFooter showLegalLinks={false}>
           {error && (
             <Text
               fontFamily="body"
@@ -299,7 +280,7 @@ function CheckoutPage() {
             </Box>
             .
           </Text>
-        </Box>
+        </LexiCtaFooter>
       </Box>
     </Box>
   );

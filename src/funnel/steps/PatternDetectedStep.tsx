@@ -7,9 +7,10 @@ import Image from "next/image";
 import { Box, Text } from "@chakra-ui/react";
 import { motion, AnimatePresence } from "framer-motion";
 
-import { LegalFooterLinks } from "@/funnel/components/LegalFooterLinks";
-import { LexiLogoBanner } from "@/funnel/components/lexi/LexiLogoBanner";
 import { LexiCtaButton } from "@/funnel/components/lexi/LexiCtaButton";
+import { LexiCtaFooter } from "@/funnel/components/lexi/LexiCtaFooter";
+import { LexiLogoBanner } from "@/funnel/components/lexi/LexiLogoBanner";
+import { LexiStepScroll } from "@/funnel/components/lexi/LexiStepScroll";
 import { useFunnelNavigation } from "@/funnel/flow/useFunnelNavigation";
 import { useFunnelAnswers } from "@/funnel/state/useFunnelAnswers";
 import { track, EVENTS } from "@/funnel/analytics/track";
@@ -143,22 +144,7 @@ export function PatternDetectedStep() {
         bg={SURFACE}
         pt={FUNNEL_STEP_TOP_PADDING}
       >
-        {/* Scrollable content */}
-        <Box
-          flex="1"
-          overflowY="auto"
-          overflowX="hidden"
-          minH={0}
-          display="flex"
-          flexDirection="column"
-          px={6}
-          pb={3}
-          css={{
-            WebkitOverflowScrolling: "touch",
-            scrollbarWidth: "none",
-            "&::-webkit-scrollbar": { display: "none" },
-          }}
-        >
+        <LexiStepScroll display="flex" flexDirection="column" px={6} pb={3}>
           {/* Logo */}
           <Box
             display="flex"
@@ -294,18 +280,12 @@ export function PatternDetectedStep() {
               </motion.div>
             )}
           </AnimatePresence>
-        </Box>
+        </LexiStepScroll>
 
-        {/* Pinned footer */}
-        <Box
-          flexShrink={0}
-          w="full"
+        <LexiCtaFooter
           px={6}
-          pt={3}
-          pb="max(16px, env(safe-area-inset-bottom))"
-          bg={SURFACE}
-          borderTop="1px solid"
-          borderColor="lexi.border"
+          showBorder={revealed}
+          legalLinksMt={revealed ? 3 : 0}
         >
           <AnimatePresence>
             {revealed && (
@@ -320,9 +300,7 @@ export function PatternDetectedStep() {
               </motion.div>
             )}
           </AnimatePresence>
-
-          <LegalFooterLinks mt={revealed ? 3 : 0} />
-        </Box>
+        </LexiCtaFooter>
       </Box>
     </Box>
   );

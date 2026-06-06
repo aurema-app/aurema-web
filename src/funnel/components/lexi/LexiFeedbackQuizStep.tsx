@@ -5,9 +5,10 @@ import { useState } from "react";
 import { Box, Text, VStack } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 
-import { LegalFooterLinks } from "@/funnel/components/LegalFooterLinks";
-import { LexiLogoBanner } from "@/funnel/components/lexi/LexiLogoBanner";
 import { LexiCtaButton } from "@/funnel/components/lexi/LexiCtaButton";
+import { LexiCtaFooter } from "@/funnel/components/lexi/LexiCtaFooter";
+import { LexiLogoBanner } from "@/funnel/components/lexi/LexiLogoBanner";
+import { LexiStepScroll } from "@/funnel/components/lexi/LexiStepScroll";
 import { LexiSaysCard } from "@/funnel/components/lexi/LexiSaysCard";
 import { QuizOptionButton } from "@/funnel/components/lexi/QuizOptionButton";
 import { setAmplitudeUserProperties } from "@/funnel/analytics/amplitudeClient";
@@ -91,20 +92,7 @@ export function LexiFeedbackQuizStep({
         bg={SURFACE}
         pt={FUNNEL_STEP_TOP_PADDING}
       >
-        {/* Scrollable: logo, question, options, Lexi says */}
-        <Box
-          flex="1"
-          overflowY="auto"
-          overflowX="hidden"
-          minH={0}
-          px={4}
-          pb={3}
-          css={{
-            WebkitOverflowScrolling: "touch",
-            scrollbarWidth: "none",
-            "&::-webkit-scrollbar": { display: "none" },
-          }}
-        >
+        <LexiStepScroll px={4} pb={3}>
           <Box minH="100%" display="flex" flexDirection="column">
             <VStack w="full" align="center" gap={0} pt={2} flexShrink={0}>
               <motion.div {...fadeUp(0)}>
@@ -163,18 +151,12 @@ export function LexiFeedbackQuizStep({
               </motion.div>
             </Box>
           </Box>
-        </Box>
+        </LexiStepScroll>
 
-        {/* Pinned CTA + footer */}
-        <Box
-          flexShrink={0}
-          w="full"
+        <LexiCtaFooter
           px={4}
-          pt={3}
-          pb="max(16px, env(safe-area-inset-bottom))"
-          bg={SURFACE}
-          borderTop={selected ? "1px solid" : "none"}
-          borderColor="lexi.border"
+          showBorder={Boolean(selected)}
+          legalLinksMt={selected ? 3 : 0}
         >
           {selected && (
             <motion.div
@@ -185,9 +167,7 @@ export function LexiFeedbackQuizStep({
               <LexiCtaButton onClick={handleContinue}>{ctaLabel}</LexiCtaButton>
             </motion.div>
           )}
-
-          <LegalFooterLinks mt={selected ? 3 : 0} />
-        </Box>
+        </LexiCtaFooter>
       </Box>
     </Box>
   );

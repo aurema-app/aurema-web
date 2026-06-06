@@ -14,8 +14,10 @@ import {
   DUMMY_PAYWALL_PLANS,
   type PaywallPlan,
 } from "@/funnel/paywall/dummyPackages";
-import { LexiLogoBanner } from "@/funnel/components/lexi/LexiLogoBanner";
 import { LexiCtaButton } from "@/funnel/components/lexi/LexiCtaButton";
+import { LexiCtaFooter } from "@/funnel/components/lexi/LexiCtaFooter";
+import { LexiLogoBanner } from "@/funnel/components/lexi/LexiLogoBanner";
+import { LexiStepScroll } from "@/funnel/components/lexi/LexiStepScroll";
 import {
   configureRevenueCat,
   getRevenueCat,
@@ -92,25 +94,12 @@ function PageShell({
         flexDirection="column"
         pt={FUNNEL_STEP_TOP_PADDING}
       >
-        <Box
-          flex="1"
-          overflowY="auto"
-          overflowX="hidden"
-          minH={0}
-          px={5}
-          pb={3}
-          css={{
-            WebkitOverflowScrolling: "touch",
-            scrollbarWidth: "none",
-            "&::-webkit-scrollbar": { display: "none" },
-          }}
-        >
-          {/* Logo */}
+        <LexiStepScroll px={5} pb={3}>
           <Box display="flex" justifyContent="center" pt={2} mb={6}>
             <LexiLogoBanner />
           </Box>
           {children}
-        </Box>
+        </LexiStepScroll>
         {footer}
       </Box>
     </Box>
@@ -524,14 +513,7 @@ export default function PaywallPage() {
   const selectedPlan = plans.find((p) => p.id === selectedId);
 
   const footer = (
-    <Box
-      flexShrink={0}
-      w="full"
-      px={5}
-      pt={3}
-      pb="max(16px, env(safe-area-inset-bottom))"
-      bg={SURFACE}
-    >
+    <LexiCtaFooter showLegalLinks={false} showBorder={false}>
       {purchaseError && (
         <Text
           fontSize="sm"
@@ -563,7 +545,6 @@ export default function PaywallPage() {
         )}
       </LexiCtaButton>
 
-      {/* Disclaimer */}
       <Text
         fontSize="11px"
         color="fg.muted"
@@ -583,7 +564,6 @@ export default function PaywallPage() {
         .
       </Text>
 
-      {/* Payment method icons */}
       <Box display="flex" justifyContent="center" mt={3} mb={1}>
         <Image
           src="/lexi/payment-methods.png"
@@ -593,7 +573,7 @@ export default function PaywallPage() {
           style={{ width: "auto", height: "70px" }}
         />
       </Box>
-    </Box>
+    </LexiCtaFooter>
   );
 
   return (

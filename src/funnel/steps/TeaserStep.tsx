@@ -5,9 +5,10 @@ import Image from "next/image";
 import { Box, Text } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 
-import { LegalFooterLinks } from "@/funnel/components/LegalFooterLinks";
-import { LexiLogoBanner } from "@/funnel/components/lexi/LexiLogoBanner";
 import { LexiCtaButton } from "@/funnel/components/lexi/LexiCtaButton";
+import { LexiCtaFooter } from "@/funnel/components/lexi/LexiCtaFooter";
+import { LexiLogoBanner } from "@/funnel/components/lexi/LexiLogoBanner";
+import { LexiStepScroll } from "@/funnel/components/lexi/LexiStepScroll";
 import { useFunnelAnswers } from "@/funnel/state/useFunnelAnswers";
 import { useFunnelNavigation } from "@/funnel/flow/useFunnelNavigation";
 import { track, EVENTS } from "@/funnel/analytics/track";
@@ -57,20 +58,7 @@ export function TeaserStep() {
         bg={SURFACE}
         pt={FUNNEL_STEP_TOP_PADDING}
       >
-        {/* Scrollable content */}
-        <Box
-          flex="1"
-          overflowY="auto"
-          overflowX="hidden"
-          minH={0}
-          px={6}
-          pb={3}
-          css={{
-            WebkitOverflowScrolling: "touch",
-            scrollbarWidth: "none",
-            "&::-webkit-scrollbar": { display: "none" },
-          }}
-        >
+        <LexiStepScroll px={6} pb={3}>
           {/* Logo */}
           <motion.div
             {...fadeUp(0)}
@@ -166,25 +154,13 @@ export function TeaserStep() {
               </Text>
             </Box>
           </motion.div>
-        </Box>
+        </LexiStepScroll>
 
-        {/* Pinned footer */}
-        <Box
-          flexShrink={0}
-          w="full"
-          px={6}
-          pt={3}
-          pb="max(16px, env(safe-area-inset-bottom))"
-          bg={SURFACE}
-          borderTop="1px solid"
-          borderColor="lexi.border"
-        >
+        <LexiCtaFooter px={6}>
           <LexiCtaButton fontStyle="italic" onClick={handleUnlock}>
             Unlock your read
           </LexiCtaButton>
-
-          <LegalFooterLinks mt={3} />
-        </Box>
+        </LexiCtaFooter>
       </Box>
     </Box>
   );
