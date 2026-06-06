@@ -8,8 +8,10 @@ import { Box, Text } from "@chakra-ui/react";
 import { motion, useAnimationFrame } from "framer-motion";
 
 import { LegalFooterLinks } from "@/funnel/components/LegalFooterLinks";
+import { LexiLogoBanner } from "@/funnel/components/lexi/LexiLogoBanner";
 import { useFunnelAnswers } from "@/funnel/state/useFunnelAnswers";
 import { useFunnelNavigation } from "@/funnel/flow/useFunnelNavigation";
+import { FUNNEL_STEP_TOP_PADDING } from "@/funnel/theme/layout.constants";
 
 const SURFACE = "#F6F2FF";
 
@@ -148,19 +150,11 @@ export function AnalyzingStep() {
         alignItems="center"
         bg={SURFACE}
         px={6}
-        pt="max(24px, env(safe-area-inset-top))"
+        pt={FUNNEL_STEP_TOP_PADDING}
         pb="max(16px, env(safe-area-inset-bottom))"
       >
         {/* Logo */}
-        <Box position="relative" h="36px" w="88px" mt={2} mb="auto">
-          <Image
-            src="/lexi/logo.png"
-            alt="Lexi"
-            fill
-            style={{ objectFit: "contain" }}
-            priority
-          />
-        </Box>
+        <LexiLogoBanner mt={2} mb="auto" />
 
         {/* Center content */}
         <Box

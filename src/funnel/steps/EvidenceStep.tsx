@@ -8,9 +8,11 @@ import { Box, Button, Text, Textarea, Wrap } from "@chakra-ui/react";
 import { motion, AnimatePresence } from "framer-motion";
 
 import { LegalFooterLinks } from "@/funnel/components/LegalFooterLinks";
+import { LexiLogoBanner } from "@/funnel/components/lexi/LexiLogoBanner";
 import { useFunnelAnswers } from "@/funnel/state/useFunnelAnswers";
 import { useFunnelNavigation } from "@/funnel/flow/useFunnelNavigation";
 import { track, EVENTS } from "@/funnel/analytics/track";
+import { FUNNEL_STEP_TOP_PADDING } from "@/funnel/theme/layout.constants";
 
 const SURFACE = "#F6F2FF";
 const MAX_IMAGES = 3;
@@ -90,7 +92,7 @@ export function EvidenceStep() {
         display="flex"
         flexDirection="column"
         bg={SURFACE}
-        pt="max(24px, env(safe-area-inset-top))"
+        pt={FUNNEL_STEP_TOP_PADDING}
       >
         {/* Scrollable content */}
         <Box
@@ -116,15 +118,7 @@ export function EvidenceStep() {
             mb={6}
             flexShrink={0}
           >
-            <Box position="relative" h="36px" w="88px">
-              <Image
-                src="/lexi/logo.png"
-                alt="Lexi"
-                fill
-                style={{ objectFit: "contain" }}
-                priority
-              />
-            </Box>
+            <LexiLogoBanner />
           </Box>
 
           {/* Headline */}

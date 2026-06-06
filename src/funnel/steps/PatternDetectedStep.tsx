@@ -4,13 +4,16 @@ import { useEffect, useState } from "react";
 
 import Image from "next/image";
 
-import { Box, Button, Text } from "@chakra-ui/react";
+import { Box, Text } from "@chakra-ui/react";
 import { motion, AnimatePresence } from "framer-motion";
 
 import { LegalFooterLinks } from "@/funnel/components/LegalFooterLinks";
+import { LexiLogoBanner } from "@/funnel/components/lexi/LexiLogoBanner";
+import { LexiCtaButton } from "@/funnel/components/lexi/LexiCtaButton";
 import { useFunnelNavigation } from "@/funnel/flow/useFunnelNavigation";
 import { useFunnelAnswers } from "@/funnel/state/useFunnelAnswers";
 import { track, EVENTS } from "@/funnel/analytics/track";
+import { FUNNEL_STEP_TOP_PADDING } from "@/funnel/theme/layout.constants";
 
 const SURFACE = "#F6F2FF";
 
@@ -138,7 +141,7 @@ export function PatternDetectedStep() {
         display="flex"
         flexDirection="column"
         bg={SURFACE}
-        pt="max(24px, env(safe-area-inset-top))"
+        pt={FUNNEL_STEP_TOP_PADDING}
       >
         {/* Scrollable content */}
         <Box
@@ -164,15 +167,7 @@ export function PatternDetectedStep() {
             mb={8}
             flexShrink={0}
           >
-            <Box position="relative" h="36px" w="88px">
-              <Image
-                src="/lexi/logo.png"
-                alt="Lexi"
-                fill
-                style={{ objectFit: "contain" }}
-                priority
-              />
-            </Box>
+            <LexiLogoBanner />
           </Box>
 
           {/* Headline */}
@@ -319,25 +314,9 @@ export function PatternDetectedStep() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
               >
-                <Button
-                  bg="brand.primary"
-                  color="white"
-                  borderRadius="full"
-                  h="56px"
-                  w="full"
-                  fontFamily="display"
-                  fontWeight="700"
-                  fontSize="17px"
-                  _hover={{
-                    transform: "translateY(-2px)",
-                    boxShadow: "0 12px 32px rgba(236,72,153,0.38)",
-                  }}
-                  _active={{ transform: "translateY(0)" }}
-                  transition="all 0.18s ease"
-                  onClick={handleContinue}
-                >
+                <LexiCtaButton onClick={handleContinue}>
                   Drop the Evidence
-                </Button>
+                </LexiCtaButton>
               </motion.div>
             )}
           </AnimatePresence>

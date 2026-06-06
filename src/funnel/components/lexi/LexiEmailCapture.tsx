@@ -2,12 +2,13 @@
 
 import { useState } from "react";
 
-import Image from "next/image";
-
-import { Box, Button, Input, Text, VStack } from "@chakra-ui/react";
+import { Box, Input, Text, VStack } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 
 import { LegalFooterLinks } from "@/funnel/components/LegalFooterLinks";
+import { LexiLogoBanner } from "@/funnel/components/lexi/LexiLogoBanner";
+import { LexiCtaButton } from "@/funnel/components/lexi/LexiCtaButton";
+import { FUNNEL_STEP_TOP_PADDING } from "@/funnel/theme/layout.constants";
 
 const SURFACE = "#F6F2FF";
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -60,7 +61,7 @@ export function LexiEmailCapture({
         display="flex"
         flexDirection="column"
         bg={SURFACE}
-        pt="max(24px, env(safe-area-inset-top))"
+        pt={FUNNEL_STEP_TOP_PADDING}
       >
         <Box
           flex="1"
@@ -76,15 +77,7 @@ export function LexiEmailCapture({
           }}
         >
           <Box position="relative" mb={4}>
-            <Box mx="auto" position="relative" h="36px" w="88px">
-              <Image
-                src="/lexi/logo.png"
-                alt="Lexi"
-                fill
-                style={{ objectFit: "contain" }}
-                priority
-              />
-            </Box>
+            <LexiLogoBanner mx="auto" />
           </Box>
 
           <VStack align="stretch" gap={8} w="full">
@@ -165,29 +158,13 @@ export function LexiEmailCapture({
           borderTop="1px solid"
           borderColor="lexi.border"
         >
-          <Button
-            bg="brand.primary"
-            color="white"
-            borderRadius="full"
-            h="56px"
-            w="full"
-            fontFamily="display"
-            fontWeight="700"
-            fontSize="17px"
+          <LexiCtaButton
             disabled={!isValid}
             onClick={handleContinue}
-            _hover={{
-              transform: isValid ? "translateY(-2px)" : undefined,
-              boxShadow: isValid
-                ? "0 12px 32px rgba(236,72,153,0.38)"
-                : undefined,
-            }}
-            _active={{ transform: "translateY(0)" }}
             _disabled={{ opacity: 0.45, cursor: "not-allowed" }}
-            transition="all 0.18s ease"
           >
             Continue
-          </Button>
+          </LexiCtaButton>
 
           <LegalFooterLinks mt={3} />
         </Box>

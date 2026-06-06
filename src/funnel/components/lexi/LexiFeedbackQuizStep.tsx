@@ -2,12 +2,12 @@
 
 import { useState } from "react";
 
-import Image from "next/image";
-
-import { Box, Button, Text, VStack } from "@chakra-ui/react";
+import { Box, Text, VStack } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 
 import { LegalFooterLinks } from "@/funnel/components/LegalFooterLinks";
+import { LexiLogoBanner } from "@/funnel/components/lexi/LexiLogoBanner";
+import { LexiCtaButton } from "@/funnel/components/lexi/LexiCtaButton";
 import { LexiSaysCard } from "@/funnel/components/lexi/LexiSaysCard";
 import { QuizOptionButton } from "@/funnel/components/lexi/QuizOptionButton";
 import { setAmplitudeUserProperties } from "@/funnel/analytics/amplitudeClient";
@@ -15,6 +15,7 @@ import { EVENTS, track } from "@/funnel/analytics/track";
 import { useFunnelNavigation } from "@/funnel/flow/useFunnelNavigation";
 import { useFunnelAnswers } from "@/funnel/state/useFunnelAnswers";
 import type { FunnelAnswers } from "@/funnel/state/types";
+import { FUNNEL_STEP_TOP_PADDING } from "@/funnel/theme/layout.constants";
 
 const SURFACE = "#F6F2FF";
 
@@ -88,7 +89,7 @@ export function LexiFeedbackQuizStep({
         display="flex"
         flexDirection="column"
         bg={SURFACE}
-        pt="max(24px, env(safe-area-inset-top))"
+        pt={FUNNEL_STEP_TOP_PADDING}
       >
         {/* Scrollable: logo, question, options, Lexi says */}
         <Box
@@ -107,15 +108,7 @@ export function LexiFeedbackQuizStep({
           <Box minH="100%" display="flex" flexDirection="column">
             <VStack w="full" align="center" gap={0} pt={2} flexShrink={0}>
               <motion.div {...fadeUp(0)}>
-                <Box position="relative" h="36px" w="88px">
-                  <Image
-                    src="/lexi/logo.png"
-                    alt="Lexi"
-                    fill
-                    style={{ objectFit: "contain" }}
-                    priority
-                  />
-                </Box>
+                <LexiLogoBanner />
               </motion.div>
 
               <motion.div
@@ -189,25 +182,7 @@ export function LexiFeedbackQuizStep({
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.25 }}
             >
-              <Button
-                bg="brand.primary"
-                color="white"
-                borderRadius="full"
-                h="56px"
-                w="full"
-                fontFamily="display"
-                fontWeight="700"
-                fontSize="17px"
-                _hover={{
-                  transform: "translateY(-2px)",
-                  boxShadow: "0 12px 32px rgba(236,72,153,0.38)",
-                }}
-                _active={{ transform: "translateY(0)" }}
-                transition="all 0.18s ease"
-                onClick={handleContinue}
-              >
-                {ctaLabel}
-              </Button>
+              <LexiCtaButton onClick={handleContinue}>{ctaLabel}</LexiCtaButton>
             </motion.div>
           )}
 

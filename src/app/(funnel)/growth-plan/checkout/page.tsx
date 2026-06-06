@@ -2,15 +2,17 @@
 
 import { Suspense, useRef, useState } from "react";
 
-import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 
-import { Box, Button, Input, Spinner, Text, VStack } from "@chakra-ui/react";
+import { Box, Input, Spinner, Text, VStack } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 
 import { setAmplitudeUserProperties } from "@/funnel/analytics/amplitudeClient";
 import { EVENTS, track } from "@/funnel/analytics/track";
+import { LexiLogoBanner } from "@/funnel/components/lexi/LexiLogoBanner";
+import { LexiCtaButton } from "@/funnel/components/lexi/LexiCtaButton";
 import { useFunnelContext } from "@/funnel/state/FunnelContext";
+import { FUNNEL_STEP_TOP_PADDING } from "@/funnel/theme/layout.constants";
 
 const SURFACE = "#F6F2FF";
 
@@ -129,7 +131,7 @@ function CheckoutPage() {
         display="flex"
         flexDirection="column"
         bg={SURFACE}
-        pt="max(24px, env(safe-area-inset-top))"
+        pt={FUNNEL_STEP_TOP_PADDING}
       >
         <Box
           flex="1"
@@ -145,15 +147,7 @@ function CheckoutPage() {
           }}
         >
           <Box display="flex" flexDirection="column" gap={6}>
-            <Box mx="auto" position="relative" h="36px" w="88px" flexShrink={0}>
-              <Image
-                src="/lexi/logo.png"
-                alt="Lexi"
-                fill
-                style={{ objectFit: "contain" }}
-                priority
-              />
-            </Box>
+            <LexiLogoBanner mx="auto" flexShrink={0} />
 
             <motion.div {...fadeUp(0.05)}>
               <VStack align="stretch" gap={1}>
@@ -255,25 +249,7 @@ function CheckoutPage() {
             </Text>
           )}
 
-          <Button
-            bg="brand.primary"
-            color="white"
-            borderRadius="full"
-            h="56px"
-            w="full"
-            fontFamily="display"
-            fontWeight="700"
-            fontSize="17px"
-            disabled={submitting}
-            onClick={handlePay}
-            _hover={{
-              transform: "translateY(-2px)",
-              boxShadow: "0 12px 32px rgba(236,72,153,0.38)",
-            }}
-            _active={{ transform: "translateY(0)" }}
-            _disabled={{ opacity: 0.6, cursor: "not-allowed" }}
-            transition="all 0.18s ease"
-          >
+          <LexiCtaButton disabled={submitting} onClick={handlePay}>
             {submitting ? (
               <Box display="flex" alignItems="center" gap={2}>
                 <Spinner size="sm" />
@@ -282,7 +258,7 @@ function CheckoutPage() {
             ) : (
               `Pay ${planId === "annual" ? "$39.99" : "$9.99"}`
             )}
-          </Button>
+          </LexiCtaButton>
 
           <Box
             display="flex"

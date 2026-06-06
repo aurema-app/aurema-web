@@ -2,6 +2,8 @@
 
 import { Box } from "@chakra-ui/react";
 
+import { FUNNEL_STEP_TOP_PADDING } from "@/funnel/theme/layout.constants";
+
 /**
  * Shared page wrapper for all Lexi funnel screens.
  * Light lavender-white background, single-column centered layout.
@@ -22,7 +24,7 @@ export function LexiLayout({ children }: { children: React.ReactNode }) {
         display="flex"
         flexDirection="column"
         px={5}
-        pt={6}
+        pt={FUNNEL_STEP_TOP_PADDING}
         pb={10}
       >
         {children}
