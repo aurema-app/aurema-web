@@ -2,18 +2,19 @@
 
 import { useState } from "react";
 
-import Image from "next/image";
-
 import { Box, Text, VStack } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 
-import { LegalFooterLinks } from "@/funnel/components/LegalFooterLinks";
+import { LexiCtaFooter } from "@/funnel/components/lexi/LexiCtaFooter";
+import { LexiLogoBanner } from "@/funnel/components/lexi/LexiLogoBanner";
+import { LexiStepScroll } from "@/funnel/components/lexi/LexiStepScroll";
 import { QuizOptionButton } from "@/funnel/components/lexi/QuizOptionButton";
 import { setAmplitudeUserProperties } from "@/funnel/analytics/amplitudeClient";
 import { EVENTS, track } from "@/funnel/analytics/track";
 import { useFunnelNavigation } from "@/funnel/flow/useFunnelNavigation";
 import { useFunnelAnswers } from "@/funnel/state/useFunnelAnswers";
 import type { FunnelAnswers } from "@/funnel/state/types";
+import { FUNNEL_STEP_TOP_PADDING } from "@/funnel/theme/layout.constants";
 
 const SURFACE = "#F6F2FF";
 
@@ -77,72 +78,50 @@ export function LexiTapQuizStep({
         display="flex"
         flexDirection="column"
         bg={SURFACE}
-        px={4}
-        pt="max(24px, env(safe-area-inset-top))"
-        pb="max(16px, env(safe-area-inset-bottom))"
+        pt={FUNNEL_STEP_TOP_PADDING}
       >
-        <VStack w="full" align="center" gap={0} flexShrink={0} pt={2}>
-          <motion.div {...fadeUp(0)}>
-            <Box position="relative" h="36px" w="88px">
-              <Image
-                src="/lexi/logo.png"
-                alt="Lexi"
-                fill
-                style={{ objectFit: "contain" }}
-                priority
-              />
-            </Box>
-          </motion.div>
+        <LexiStepScroll px={4} pb={3}>
+          <VStack w="full" align="center" gap={0} pt={2}>
+            <motion.div {...fadeUp(0)}>
+              <LexiLogoBanner />
+            </motion.div>
 
-          <motion.div
-            {...fadeUp(0.08)}
-            style={{ width: "100%", marginTop: "20px" }}
-          >
-            <Text
-              fontFamily="body"
-              fontSize="24px"
-              fontWeight="800"
-              lineHeight="1.2"
-              letterSpacing="-0.3px"
-              color="fg.default"
-              textAlign="center"
+            <motion.div
+              {...fadeUp(0.08)}
+              style={{ width: "100%", marginTop: "20px" }}
             >
-              {question}
-            </Text>
-          </motion.div>
-        </VStack>
+              <Text
+                fontFamily="body"
+                fontSize="24px"
+                fontWeight="800"
+                lineHeight="1.2"
+                letterSpacing="-0.3px"
+                color="fg.default"
+                textAlign="center"
+              >
+                {question}
+              </Text>
+            </motion.div>
+          </VStack>
 
-        <Box
-          flex="1"
-          w="full"
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-          py={4}
-          minH={0}
-          overflowY="auto"
-          css={{
-            WebkitOverflowScrolling: "touch",
-            scrollbarWidth: "none",
-            "&::-webkit-scrollbar": { display: "none" },
-          }}
-        >
-          <motion.div {...fadeUp(0.16)} style={{ width: "100%" }}>
-            <VStack gap={2.5} w="full" align="stretch">
-              {options.map((opt) => (
-                <QuizOptionButton
-                  key={opt.id}
-                  emoji={opt.emoji}
-                  label={opt.label}
-                  selected={selected === opt.id}
-                  onClick={() => handleSelect(opt.id)}
-                />
-              ))}
-            </VStack>
-          </motion.div>
-        </Box>
+          <Box w="full" py={4}>
+            <motion.div {...fadeUp(0.16)} style={{ width: "100%" }}>
+              <VStack gap={2.5} w="full" align="stretch">
+                {options.map((opt) => (
+                  <QuizOptionButton
+                    key={opt.id}
+                    emoji={opt.emoji}
+                    label={opt.label}
+                    selected={selected === opt.id}
+                    onClick={() => handleSelect(opt.id)}
+                  />
+                ))}
+              </VStack>
+            </motion.div>
+          </Box>
+        </LexiStepScroll>
 
-        <LegalFooterLinks flexShrink={0} />
+        <LexiCtaFooter px={4} />
       </Box>
     </Box>
   );

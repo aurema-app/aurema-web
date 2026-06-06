@@ -7,9 +7,12 @@ import Image from "next/image";
 import { Box, Text } from "@chakra-ui/react";
 import { motion, useAnimationFrame } from "framer-motion";
 
-import { LegalFooterLinks } from "@/funnel/components/LegalFooterLinks";
+import { LexiCtaFooter } from "@/funnel/components/lexi/LexiCtaFooter";
+import { LexiLogoBanner } from "@/funnel/components/lexi/LexiLogoBanner";
+import { LexiStepScroll } from "@/funnel/components/lexi/LexiStepScroll";
 import { useFunnelAnswers } from "@/funnel/state/useFunnelAnswers";
 import { useFunnelNavigation } from "@/funnel/flow/useFunnelNavigation";
+import { FUNNEL_STEP_TOP_PADDING } from "@/funnel/theme/layout.constants";
 
 const SURFACE = "#F6F2FF";
 
@@ -148,29 +151,16 @@ export function AnalyzingStep() {
         alignItems="center"
         bg={SURFACE}
         px={6}
-        pt="max(24px, env(safe-area-inset-top))"
-        pb="max(16px, env(safe-area-inset-bottom))"
+        pt={FUNNEL_STEP_TOP_PADDING}
       >
-        {/* Logo */}
-        <Box position="relative" h="36px" w="88px" mt={2} mb="auto">
-          <Image
-            src="/lexi/logo.png"
-            alt="Lexi"
-            fill
-            style={{ objectFit: "contain" }}
-            priority
-          />
-        </Box>
-
-        {/* Center content */}
-        <Box
+        <LexiStepScroll
           display="flex"
           flexDirection="column"
           alignItems="center"
           gap={6}
-          flex="1"
-          justifyContent="center"
+          pb={3}
         >
+          <LexiLogoBanner mt={2} mb={6} />
           {/* Circular video — no margin, video anchored to top */}
           <Box
             w="240px"
@@ -304,10 +294,9 @@ export function AnalyzingStep() {
               </Box>
             )}
           </Box>
-        </Box>
+        </LexiStepScroll>
 
-        {/* Footer */}
-        <LegalFooterLinks mt="auto" pt={4} />
+        <LexiCtaFooter px={6} showBorder={false} />
       </Box>
     </Box>
   );

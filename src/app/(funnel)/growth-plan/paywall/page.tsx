@@ -14,6 +14,10 @@ import {
   DUMMY_PAYWALL_PLANS,
   type PaywallPlan,
 } from "@/funnel/paywall/dummyPackages";
+import { LexiCtaButton } from "@/funnel/components/lexi/LexiCtaButton";
+import { LexiCtaFooter } from "@/funnel/components/lexi/LexiCtaFooter";
+import { LexiLogoBanner } from "@/funnel/components/lexi/LexiLogoBanner";
+import { LexiStepScroll } from "@/funnel/components/lexi/LexiStepScroll";
 import {
   configureRevenueCat,
   getRevenueCat,
@@ -22,6 +26,7 @@ import {
 import { setAmplitudeUserProperties } from "@/funnel/analytics/amplitudeClient";
 import { useFunnelContext } from "@/funnel/state/FunnelContext";
 import { EVENTS, track } from "@/funnel/analytics/track";
+import { FUNNEL_STEP_TOP_PADDING } from "@/funnel/theme/layout.constants";
 
 const SURFACE = "#F6F2FF";
 
@@ -87,35 +92,14 @@ function PageShell({
         h="full"
         display="flex"
         flexDirection="column"
-        pt="max(24px, env(safe-area-inset-top))"
+        pt={FUNNEL_STEP_TOP_PADDING}
       >
-        <Box
-          flex="1"
-          overflowY="auto"
-          overflowX="hidden"
-          minH={0}
-          px={5}
-          pb={3}
-          css={{
-            WebkitOverflowScrolling: "touch",
-            scrollbarWidth: "none",
-            "&::-webkit-scrollbar": { display: "none" },
-          }}
-        >
-          {/* Logo */}
+        <LexiStepScroll px={5} pb={3}>
           <Box display="flex" justifyContent="center" pt={2} mb={6}>
-            <Box position="relative" h="36px" w="88px">
-              <Image
-                src="/lexi/logo.png"
-                alt="Lexi"
-                fill
-                style={{ objectFit: "contain" }}
-                priority
-              />
-            </Box>
+            <LexiLogoBanner />
           </Box>
           {children}
-        </Box>
+        </LexiStepScroll>
         {footer}
       </Box>
     </Box>
@@ -529,14 +513,7 @@ export default function PaywallPage() {
   const selectedPlan = plans.find((p) => p.id === selectedId);
 
   const footer = (
-    <Box
-      flexShrink={0}
-      w="full"
-      px={5}
-      pt={3}
-      pb="max(16px, env(safe-area-inset-bottom))"
-      bg={SURFACE}
-    >
+    <LexiCtaFooter showLegalLinks={false} showBorder={false}>
       {purchaseError && (
         <Text
           fontSize="sm"
@@ -549,26 +526,11 @@ export default function PaywallPage() {
         </Text>
       )}
 
-      <Button
-        bg="brand.primary"
-        color="white"
-        borderRadius="full"
-        h="56px"
-        w="full"
-        fontFamily="display"
-        fontWeight="700"
-        fontSize="17px"
+      <LexiCtaButton
         fontStyle="italic"
         disabled={!selectedId || isPurchasing}
-        _hover={{
-          transform: selectedId ? "translateY(-2px)" : undefined,
-          boxShadow: selectedId
-            ? "0 12px 32px rgba(236,72,153,0.45)"
-            : undefined,
-        }}
-        _active={{ transform: "translateY(0)" }}
-        _disabled={{ opacity: 0.5, cursor: "not-allowed" }}
         transition="all 0.2s"
+        _disabled={{ opacity: 0.5, cursor: "not-allowed" }}
         onClick={handlePurchase}
       >
         {isPurchasing ? (
@@ -581,9 +543,8 @@ export default function PaywallPage() {
         ) : (
           "Choose a plan"
         )}
-      </Button>
+      </LexiCtaButton>
 
-      {/* Disclaimer */}
       <Text
         fontSize="11px"
         color="fg.muted"
@@ -603,7 +564,6 @@ export default function PaywallPage() {
         .
       </Text>
 
-      {/* Payment method icons */}
       <Box display="flex" justifyContent="center" mt={3} mb={1}>
         <Image
           src="/lexi/payment-methods.png"
@@ -613,7 +573,7 @@ export default function PaywallPage() {
           style={{ width: "auto", height: "70px" }}
         />
       </Box>
-    </Box>
+    </LexiCtaFooter>
   );
 
   return (

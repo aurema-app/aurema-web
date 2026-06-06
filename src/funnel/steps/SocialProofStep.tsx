@@ -1,14 +1,16 @@
 "use client";
 
-import Image from "next/image";
-
-import { Box, Button, Text, VStack } from "@chakra-ui/react";
+import { Box, Text, VStack } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 
-import { LegalFooterLinks } from "@/funnel/components/LegalFooterLinks";
+import { LexiCtaButton } from "@/funnel/components/lexi/LexiCtaButton";
+import { LexiCtaFooter } from "@/funnel/components/lexi/LexiCtaFooter";
+import { LexiLogoBanner } from "@/funnel/components/lexi/LexiLogoBanner";
+import { LexiStepScroll } from "@/funnel/components/lexi/LexiStepScroll";
 import { useFunnelNavigation } from "@/funnel/flow/useFunnelNavigation";
 import { track, EVENTS } from "@/funnel/analytics/track";
 import { TestimonialCard } from "@/funnel/components/lexi/TestimonialCard";
+import { FUNNEL_STEP_TOP_PADDING } from "@/funnel/theme/layout.constants";
 
 const SURFACE = "#F6F2FF";
 
@@ -65,32 +67,12 @@ export function SocialProofStep() {
         display="flex"
         flexDirection="column"
         bg={SURFACE}
-        pt="max(24px, env(safe-area-inset-top))"
+        pt={FUNNEL_STEP_TOP_PADDING}
       >
-        {/* Scrollable content */}
-        <Box
-          flex="1"
-          overflowY="auto"
-          overflowX="hidden"
-          px={4}
-          pb={3}
-          css={{
-            WebkitOverflowScrolling: "touch",
-            scrollbarWidth: "none",
-            "&::-webkit-scrollbar": { display: "none" },
-          }}
-        >
+        <LexiStepScroll px={4} pb={3}>
           <VStack gap={{ base: 3, sm: 4 }} w="full" align="center" pb={2}>
             <motion.div {...fadeUp(0)}>
-              <Box position="relative" h="36px" w="88px">
-                <Image
-                  src="/lexi/logo.png"
-                  alt="Lexi"
-                  fill
-                  style={{ objectFit: "contain" }}
-                  priority
-                />
-              </Box>
+              <LexiLogoBanner />
             </motion.div>
 
             <motion.div {...fadeUp(0.06)} style={{ width: "100%" }}>
@@ -145,17 +127,11 @@ export function SocialProofStep() {
                   >
                     already get help from
                   </Text>
-                  <Box position="relative" h="14px" w="44px" flexShrink={0}>
-                    <Image
-                      src="/lexi/logo.png"
-                      alt="Lexi"
-                      fill
-                      style={{
-                        objectFit: "contain",
-                        objectPosition: "left center",
-                      }}
-                    />
-                  </Box>
+                  <LexiLogoBanner
+                    size="sm"
+                    flexShrink={0}
+                    objectPosition="left center"
+                  />
                 </Box>
               </Box>
             </motion.div>
@@ -182,41 +158,13 @@ export function SocialProofStep() {
               ))}
             </VStack>
           </VStack>
-        </Box>
+        </LexiStepScroll>
 
-        {/* Pinned CTA + footer — always visible */}
-        <Box
-          flexShrink={0}
-          w="full"
-          px={4}
-          pt={3}
-          pb="max(16px, env(safe-area-inset-bottom))"
-          bg={SURFACE}
-          borderTop="1px solid"
-          borderColor="lexi.border"
-        >
-          <Button
-            bg="brand.primary"
-            color="white"
-            borderRadius="full"
-            h={{ base: "56px", sm: "60px" }}
-            w="full"
-            fontFamily="display"
-            fontWeight="700"
-            fontSize="17px"
-            _hover={{
-              transform: "translateY(-2px)",
-              boxShadow: "0 12px 32px rgba(236,72,153,0.38)",
-            }}
-            _active={{ transform: "translateY(0)" }}
-            transition="all 0.18s ease"
-            onClick={handleCta}
-          >
+        <LexiCtaFooter px={4}>
+          <LexiCtaButton h={{ base: "56px", sm: "60px" }} onClick={handleCta}>
             See where you stand
-          </Button>
-
-          <LegalFooterLinks mt={3} />
-        </Box>
+          </LexiCtaButton>
+        </LexiCtaFooter>
       </Box>
     </Box>
   );

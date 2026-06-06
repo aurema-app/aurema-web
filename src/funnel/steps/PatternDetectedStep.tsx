@@ -4,13 +4,17 @@ import { useEffect, useState } from "react";
 
 import Image from "next/image";
 
-import { Box, Button, Text } from "@chakra-ui/react";
+import { Box, Text } from "@chakra-ui/react";
 import { motion, AnimatePresence } from "framer-motion";
 
-import { LegalFooterLinks } from "@/funnel/components/LegalFooterLinks";
+import { LexiCtaButton } from "@/funnel/components/lexi/LexiCtaButton";
+import { LexiCtaFooter } from "@/funnel/components/lexi/LexiCtaFooter";
+import { LexiLogoBanner } from "@/funnel/components/lexi/LexiLogoBanner";
+import { LexiStepScroll } from "@/funnel/components/lexi/LexiStepScroll";
 import { useFunnelNavigation } from "@/funnel/flow/useFunnelNavigation";
 import { useFunnelAnswers } from "@/funnel/state/useFunnelAnswers";
 import { track, EVENTS } from "@/funnel/analytics/track";
+import { FUNNEL_STEP_TOP_PADDING } from "@/funnel/theme/layout.constants";
 
 const SURFACE = "#F6F2FF";
 
@@ -138,24 +142,9 @@ export function PatternDetectedStep() {
         display="flex"
         flexDirection="column"
         bg={SURFACE}
-        pt="max(24px, env(safe-area-inset-top))"
+        pt={FUNNEL_STEP_TOP_PADDING}
       >
-        {/* Scrollable content */}
-        <Box
-          flex="1"
-          overflowY="auto"
-          overflowX="hidden"
-          minH={0}
-          display="flex"
-          flexDirection="column"
-          px={6}
-          pb={3}
-          css={{
-            WebkitOverflowScrolling: "touch",
-            scrollbarWidth: "none",
-            "&::-webkit-scrollbar": { display: "none" },
-          }}
-        >
+        <LexiStepScroll display="flex" flexDirection="column" px={6} pb={3}>
           {/* Logo */}
           <Box
             display="flex"
@@ -164,15 +153,7 @@ export function PatternDetectedStep() {
             mb={8}
             flexShrink={0}
           >
-            <Box position="relative" h="36px" w="88px">
-              <Image
-                src="/lexi/logo.png"
-                alt="Lexi"
-                fill
-                style={{ objectFit: "contain" }}
-                priority
-              />
-            </Box>
+            <LexiLogoBanner />
           </Box>
 
           {/* Headline */}
@@ -299,18 +280,12 @@ export function PatternDetectedStep() {
               </motion.div>
             )}
           </AnimatePresence>
-        </Box>
+        </LexiStepScroll>
 
-        {/* Pinned footer */}
-        <Box
-          flexShrink={0}
-          w="full"
+        <LexiCtaFooter
           px={6}
-          pt={3}
-          pb="max(16px, env(safe-area-inset-bottom))"
-          bg={SURFACE}
-          borderTop="1px solid"
-          borderColor="lexi.border"
+          showBorder={revealed}
+          legalLinksMt={revealed ? 3 : 0}
         >
           <AnimatePresence>
             {revealed && (
@@ -319,31 +294,13 @@ export function PatternDetectedStep() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
               >
-                <Button
-                  bg="brand.primary"
-                  color="white"
-                  borderRadius="full"
-                  h="56px"
-                  w="full"
-                  fontFamily="display"
-                  fontWeight="700"
-                  fontSize="17px"
-                  _hover={{
-                    transform: "translateY(-2px)",
-                    boxShadow: "0 12px 32px rgba(236,72,153,0.38)",
-                  }}
-                  _active={{ transform: "translateY(0)" }}
-                  transition="all 0.18s ease"
-                  onClick={handleContinue}
-                >
+                <LexiCtaButton onClick={handleContinue}>
                   Drop the Evidence
-                </Button>
+                </LexiCtaButton>
               </motion.div>
             )}
           </AnimatePresence>
-
-          <LegalFooterLinks mt={revealed ? 3 : 0} />
-        </Box>
+        </LexiCtaFooter>
       </Box>
     </Box>
   );
