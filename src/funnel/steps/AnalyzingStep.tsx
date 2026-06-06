@@ -12,6 +12,7 @@ import { LexiLogoBanner } from "@/funnel/components/lexi/LexiLogoBanner";
 import { LexiStepScroll } from "@/funnel/components/lexi/LexiStepScroll";
 import { useFunnelAnswers } from "@/funnel/state/useFunnelAnswers";
 import { useFunnelNavigation } from "@/funnel/flow/useFunnelNavigation";
+import { FUNNEL_VIDEOS } from "@/funnel/constants/funnelVideos";
 import { FUNNEL_STEP_TOP_PADDING } from "@/funnel/theme/layout.constants";
 
 const SURFACE = "#F6F2FF";
@@ -170,11 +171,12 @@ export function AnalyzingStep() {
             flexShrink={0}
           >
             <video
-              src="/lexi/lexi-analysis.mp4"
+              src={FUNNEL_VIDEOS.ANALYSIS}
               autoPlay
               loop
               muted
               playsInline
+              preload="auto"
               style={{
                 width: "100%",
                 height: "100%",

@@ -150,6 +150,16 @@ body:has(.lexi-funnel-root) .background-pattern {
   display: none;
 }
 
+/* iOS Safari auto-zooms focused inputs when font-size is below 16px */
+.lexi-funnel-root
+  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not(
+    [type="hidden"]
+  ),
+.lexi-funnel-root textarea,
+.lexi-funnel-root select {
+  font-size: 16px !important;
+}
+
 /* Lexi script — add Bumbbled-Regular.woff2 or .ttf to public/fonts/ */
 @font-face {
   font-family: "Bumbbled";

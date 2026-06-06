@@ -105,7 +105,7 @@ function CheckoutPage() {
     borderColor: "#E4DBFE",
     borderRadius: "14px",
     fontFamily: "body",
-    fontSize: "15px",
+    fontSize: "16px",
     fontWeight: "500",
     color: "fg.default",
     _placeholder: { color: "#B8A8C4" },

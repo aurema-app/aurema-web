@@ -312,7 +312,7 @@ export function EvidenceStep() {
                   _focus={{ boxShadow: "none", borderColor: "brand.primary" }}
                   resize="none"
                   rows={4}
-                  fontSize="15px"
+                  fontSize="16px"
                   color="fg.default"
                   fontFamily="body"
                   fontWeight="500"

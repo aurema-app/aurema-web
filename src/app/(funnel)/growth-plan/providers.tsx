@@ -11,6 +11,7 @@ import {
 import { initExperimentClient } from "@/funnel/experiments/amplitudeExperimentClient";
 import { FunnelProvider } from "@/funnel/state/FunnelContext";
 import { useFunnelContext } from "@/funnel/state/FunnelContext";
+import { FunnelVideoPreload } from "@/funnel/components/FunnelVideoPreload";
 import { chakraSystem } from "@/funnel/theme/chakraTheme";
 import { track, EVENTS } from "@/funnel/analytics/track";
 
@@ -75,6 +76,7 @@ export function FunnelProviders({ children }: { children: React.ReactNode }) {
     <ChakraProvider value={chakraSystem}>
       <FunnelProvider>
         <AmplitudeBootstrap />
+        <FunnelVideoPreload />
         {children}
       </FunnelProvider>
     </ChakraProvider>
